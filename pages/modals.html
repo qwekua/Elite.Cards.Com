@@ -1,0 +1,107 @@
+<!-- Auth Modal -->
+<div class="modal-overlay" id="auth-modal">
+    <div class="modal auth-modal">
+        <span class="close-modal">&times;</span>
+        <div class="auth-tabs">
+            <div class="auth-tab active" data-tab="login">Login</div>
+            <div class="auth-tab" data-tab="register">Register</div>
+        </div>
+        <form id="login-form" class="auth-form active">
+            <div class="form-group">
+                <label for="login-email">Email</label>
+                <input type="email" id="login-email" required>
+            </div>
+            <div class="form-group">
+                <label for="login-password">Password</label>
+                <input type="password" id="login-password" required>
+            </div>
+            <button type="submit" class="auth-btn">Login</button>
+            <div class="auth-footer">
+                Don't have an account? <span class="switch-auth">Register</span>
+            </div>
+        </form>
+        <form id="register-form" class="auth-form">
+            <div class="form-group">
+                <label for="register-name">Full Name</label>
+                <input type="text" id="register-name" required>
+            </div>
+            <div class="form-group">
+                <label for="register-email">Email</label>
+                <input type="email" id="register-email" required>
+            </div>
+            <div class="form-group">
+                <label for="register-password">Password</label>
+                <input type="password" id="register-password" required>
+            </div>
+            <div class="form-group">
+                <label for="register-confirm">Confirm Password</label>
+                <input type="password" id="register-confirm" required>
+            </div>
+            <button type="submit" class="auth-btn">Register</button>
+            <div class="auth-footer">
+                Already have an account? <span class="switch-auth">Login</span>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Payment Modal -->
+<div class="modal-overlay" id="payment-modal">
+    <div class="modal">
+        <span class="close-modal">&times;</span>
+        <div class="payment-header">
+            <h2><span class="highlight">MoMo</span> Payments [For Ghanaians Only]</h2>
+            <p>Send e-money to complete your purchase</p>
+        </div>
+        
+        <div class="payment-steps">
+            <h3>Send e-money</h3>
+            <ol>
+                <li>Dial <strong>*170#</strong></li>
+                <li>Select <strong>1. Send Money</strong></li>
+                <li>Select recipient type</li>
+                <li>Follow prompts</li>
+            </ol>
+        </div>
+        
+        <div class="payment-guide">
+            <p><span class="highlight">NB:</span> Use Your name  as your payment reference.</p>
+            <p><span class="highlight">Follow the steps above to make payment</span></p>
+            <p><span class="highlight">VODAFONE CASH (Ghanaian Admin) 050 677 1158</span></p>
+            <p><span class="highlight">Account Name: PHILOMINA APPOH</span></p>
+        </div>
+        
+        <div class="payment-details">
+            <p>Amount to pay: <span class="amount" id="payment-amount">$0.00 (GHS 0.00)</span></p>
+        </div>
+        
+        <div class="form-group">
+            <label for="payment-email">Email Address *</label>
+            <input type="email" id="payment-email" placeholder="E.g. john@doe.com" required>
+        </div>
+        
+        <div class="upload-section" id="upload-section">
+            <div class="upload-icon">
+                <i class="fas fa-cloud-upload-alt"></i>
+            </div>
+            <p class="upload-text">Click on icon below to upload payment screenshot</p>
+            <button class="upload-btn">Select File</button>
+            <input type="file" id="payment-screenshot" accept="image/*">
+            <img src="" alt="Preview" class="preview-image" id="preview-image">
+        </div>
+        
+        <button class="confirm-btn" id="confirm-payment-btn" disabled>Confirm Payment</button>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal-overlay" id="success-modal">
+    <div class="modal success-modal">
+        <div class="success-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <h2 class="success-title">Payment Successful!</h2>
+        <p class="success-message">Your premium virtual card details have been sent to your email. Thank you for choosing <span class="highlight">ElitCards</span>!</p>
+        <a href="#" class="back-to-shop products-link">Back to Shop</a>
+    </div>
+</div>

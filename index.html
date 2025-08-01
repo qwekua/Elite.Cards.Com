@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ElitCards | Premium Virtual Cards</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Overlay for mobile menu -->
+    <div class="overlay"></div>
+    
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav class="navbar">
+                <a href="#" class="logo">Elit<span>Cards</span><sup class="premium-badge">PREMIUM</sup></a>
+                
+                <!-- Navigation links -->
+                <ul class="nav-links">
+                    <li><a href="#" class="home-link active"><i class="fas fa-home"></i> Home</a></li>
+                    <li><a href="#" class="products-link"><i class="fas fa-credit-card"></i> Cards</a></li>
+                    <li><a href="#" class="support-link"><i class="fas fa-headset"></i> Support</a></li>
+                    <li><a href="#" class="dashboard-link" style="display: none;"><i class="fas fa-user"></i> Dashboard</a></li>
+                    <li><a href="#" class="cart-link">
+                        <i class="fas fa-shopping-cart cart-icon"></i>
+                        <span class="cart-count">0</span>
+                    </a></li>
+                </ul>
+                
+                <!-- Auth buttons -->
+                <div class="auth-buttons">
+                    <button class="login-btn" id="login-btn">Login</button>
+                    <button class="register-btn" id="register-btn">Register</button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content - Components will be loaded here -->
+    <main id="main-content">
+        <div id="component-container"></div>
+    </main>
+    
+    <!-- Mobile Footer Navigation -->
+    <div class="mobile-footer-nav">
+        <a href="#" class="footer-nav-item home-link active">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="#" class="footer-nav-item products-link">
+            <i class="fas fa-credit-card"></i>
+            <span>Cards</span>
+        </a>
+        <a href="#" class="footer-nav-item cart-link">
+            <i class="fas fa-shopping-cart"></i>
+            <span>Cart</span>
+            <span class="footer-cart-count">0</span>
+        </a>
+        <a href="#" class="footer-nav-item account-link">
+            <i class="fas fa-user"></i>
+            <span>Account</span>
+        </a>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+    
+    <!-- JavaScript -->
+    <script src="db.js"></script>
+    <script src="pages.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
