@@ -710,13 +710,15 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 document.addEventListener("DOMContentLoaded", function () {
     const pageLinks = {
-        "home-link": Pages.PAGES.HOME,
-        "products-link": Pages.PAGES.PRODUCTS,
-        "support-link": Pages.PAGES.SUPPORT,
-        "dashboard-link": Pages.PAGES.DASHBOARD,
-        "account-link": Pages.PAGES.DASHBOARD,
-        "cart-link": Pages.PAGES.CART,
-    };
+    "home-link": Pages.PAGES.HOME,
+    "products-link": Pages.PAGES.PRODUCTS,
+    "support-link": Pages.PAGES.SUPPORT,
+    "dashboard-link": Pages.PAGES.DASHBOARD,
+    "account-link": Pages.PAGES.DASHBOARD,
+    "cart-link": Pages.PAGES.CART,
+    "about-link": Pages.PAGES.ABOUT  // 👈 Add it here
+};
+
 
     Object.entries(pageLinks).forEach(([className, page]) => {
         document.querySelectorAll(`.${className}`).forEach(link => {

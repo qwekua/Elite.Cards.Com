@@ -257,6 +257,29 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             </div>
         `
+        // 👇 ADD THIS
+    ABOUT: `
+        <!-- About Section -->
+        <section class="about" id="about-section">
+            <div class="container">
+                <h2 class="section-title">About <span class="highlight">ElitCards</span></h2>
+                <p>ElitCards provides high-limit virtual cards with instant delivery, secure payments, and unmatched convenience. We aim to simplify online financial transactions for professionals worldwide.</p>
+                <div class="about-features">
+                    <div class="feature">
+                        <i class="fas fa-shield-alt"></i>
+                        <h3>Security First</h3>
+                        <p>End-to-end encrypted systems built with your safety in mind.</p>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-clock"></i>
+                        <h3>Instant Issuance</h3>
+                        <p>Virtual cards delivered immediately after payment confirmation.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    `
+
     };
     
     /**
@@ -330,12 +353,13 @@ document.addEventListener('DOMContentLoaded', function() {
         load: function(pageKey) {
             return loadPage(pageKey);
         },
-        PAGES: {
-            HOME: 'HOME',
-            PRODUCTS: 'PRODUCTS',
-            DASHBOARD: 'DASHBOARD',
-            CART: 'CART',
-            MODALS: 'MODALS'
-        }
+       PAGES: {
+    HOME: 'HOME',
+    PRODUCTS: 'PRODUCTS',
+    DASHBOARD: 'DASHBOARD',
+    CART: 'CART',
+    MODALS: 'MODALS',
+    ABOUT: 'ABOUT' // 👈 Add this
+}
     };
 });
