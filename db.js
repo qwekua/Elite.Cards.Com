@@ -16,172 +16,59 @@ class Database {
      */
     initializeData() {
         // Initialize products if not exists
-if (!localStorage.getItem('products')) {
-    const defaultProducts = [
-        {
-            id: 1,
-            title: "Mastercard Platinum",
-            number: "XXXX XXXX XXXX 1111",
-            limit: "$75,000",
-            price: 35,
-            image: "images/mastercard_platinum.jpg"
-        },
-        {
-            id: 2,
-            title: "Visa Infinite",
-            number: "XXXX XXXX XXXX 2222",
-            limit: "$100,000",
-            price: 50,
-            image: "images/visa_infinite.jpg"
-        },
-        {
-            id: 3,
-            title: "Amex Gold",
-            number: "XXXX XXXX XXXX 3333",
-            limit: "$60,000",
-            price: 40,
-            image: "images/amex_gold.jpg"
-        },
-        {
-            id: 4,
-            title: "Amex Platinum",
-            number: "XXXX XXXX XXXX 4444",
-            limit: "$120,000",
-            price: 60,
-            image: "images/amex_platinum.jpg"
-        },
-        {
-            id: 5,
-            title: "Chase Sapphire Reserve",
-            number: "XXXX XXXX XXXX 5555",
-            limit: "$90,000",
-            price: 55,
-            image: "images/chase_sapphire_reserve.jpg"
-        },
-        {
-            id: 6,
-            title: "Citi Prestige",
-            number: "XXXX XXXX XXXX 6666",
-            limit: "$85,000",
-            price: 45,
-            image: "images/citi_prestige.jpg"
-        },
-        {
-            id: 7,
-            title: "HSBC Premier",
-            number: "XXXX XXXX XXXX 7777",
-            limit: "$70,000",
-            price: 38,
-            image: "images/hsbc_premier.jpg"
-        },
-        {
-            id: 8,
-            title: "Barclays Black",
-            number: "XXXX XXXX XXXX 8888",
-            limit: "$95,000",
-            price: 42,
-            image: "images/barclays_black.jpg"
-        },
-        {
-            id: 9,
-            title: "Capital One Venture X",
-            number: "XXXX XXXX XXXX 9999",
-            limit: "$80,000",
-            price: 37,
-            image: "images/capitalone_venturex.jpg"
-        },
-        {
-            id: 10,
-            title: "Discover IT Chrome",
-            number: "XXXX XXXX XXXX 1010",
-            limit: "$60,000",
-            price: 28,
-            image: "images/discover_it_chrome.jpg"
-        },
-        {
-            id: 11,
-            title: "Revolut Metal",
-            number: "XXXX XXXX XXXX 1112",
-            limit: "$55,000",
-            price: 30,
-            image: "images/revolut_metal.jpg"
-        },
-        {
-            id: 12,
-            title: "N26 Black",
-            number: "XXXX XXXX XXXX 1213",
-            limit: "$50,000",
-            price: 32,
-            image: "images/n26_black.jpg"
-        },
-        {
-            id: 13,
-            title: "Curve Metal",
-            number: "XXXX XXXX XXXX 1314",
-            limit: "$48,000",
-            price: 29,
-            image: "images/curve_metal.jpg"
-        },
-        {
-            id: 14,
-            title: "Monzo Premium",
-            number: "XXXX XXXX XXXX 1415",
-            limit: "$52,000",
-            price: 31,
-            image: "images/monzo_premium.jpg"
-        },
-        {
-            id: 15,
-            title: "Wirex Crypto",
-            number: "XXXX XXXX XXXX 1516",
-            limit: "$40,000",
-            price: 27,
-            image: "images/wirex_crypto.jpg"
-        },
-        {
-            id: 16,
-            title: "Crypto.com Ruby",
-            number: "XXXX XXXX XXXX 1617",
-            limit: "$45,000",
-            price: 33,
-            image: "images/crypto_ruby.jpg"
-        },
-        {
-            id: 17,
-            title: "Crypto.com Obsidian",
-            number: "XXXX XXXX XXXX 1718",
-            limit: "$150,000",
-            price: 65,
-            image: "images/crypto_obsidian.jpg"
-        },
-        {
-            id: 18,
-            title: "Payoneer Business",
-            number: "XXXX XXXX XXXX 1819",
-            limit: "$70,000",
-            price: 36,
-            image: "images/payoneer_business.jpg"
-        },
-        {
-            id: 19,
-            title: "Wise Borderless",
-            number: "XXXX XXXX XXXX 1920",
-            limit: "$55,000",
-            price: 34,
-            image: "images/wise_borderless.jpg"
-        },
-        {
-            id: 20,
-            title: "US Bank Altitude Reserve",
-            number: "XXXX XXXX XXXX 2021",
-            limit: "$110,000",
-            price: 52,
-            image: "images/usbank_altitude_reserve.jpg"
+        if (!localStorage.getItem('products')) {
+            const defaultProducts = [
+                {
+                    id: 1,
+                    title: "Elite Visa Black Card",
+                    number: "XXXX XXXX XXXX 1234",
+                    limit: "Unlimited",
+                    price: 299.99,
+                    image: "images/card1.png"
+                },
+                {
+                    id: 2,
+                    title: "Elite Mastercard Gold",
+                    number: "XXXX XXXX XXXX 5678",
+                    limit: "$50,000",
+                    price: 199.99,
+                    image: "images/card2.png"
+                },
+                {
+                    id: 3,
+                    title: "Elite Amex Platinum",
+                    number: "XXXX XXXX XXXX 9012",
+                    limit: "$100,000",
+                    price: 249.99,
+                    image: "images/card3.png"
+                },
+                {
+                    id: 4,
+                    title: "Elite Discover Diamond",
+                    number: "XXXX XXXX XXXX 3456",
+                    limit: "$75,000",
+                    price: 179.99,
+                    image: "images/card4.png"
+                },
+                {
+                    id: 5,
+                    title: "Elite Visa Infinite",
+                    number: "XXXX XXXX XXXX 7890",
+                    limit: "$200,000",
+                    price: 349.99,
+                    image: "images/card5.png"
+                },
+                {
+                    id: 6,
+                    title: "Elite Mastercard World",
+                    number: "XXXX XXXX XXXX 2345",
+                    limit: "$150,000",
+                    price: 279.99,
+                    image: "images/card6.png"
+                }
+            ];
+            localStorage.setItem('products', JSON.stringify(defaultProducts));
         }
-    ];
-
-    localStorage.setItem('products', JSON.stringify(defaultProducts));
-}
 
         // Initialize cart if not exists
         if (!localStorage.getItem('cart')) {
@@ -195,13 +82,13 @@ if (!localStorage.getItem('products')) {
                     name: "John Doe",
                     email: "john@example.com",
                     password: "password123",
-                   
+                    joinDate: "2023-01-15T12:00:00.000Z"
                 },
                 {
                     name: "Jane Smith",
                     email: "jane@example.com",
                     password: "password123",
-                   
+                    joinDate: "2023-02-20T14:30:00.000Z"
                 }
             ];
             localStorage.setItem('users', JSON.stringify(defaultUsers));
