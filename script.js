@@ -254,7 +254,6 @@ document.addEventListener('DOMContentLoaded', function() {
             name,
             email,
             password,
-            joinDate: new Date().toISOString()
         };
         
         db.addUser(newUser);
