@@ -706,5 +706,34 @@ document.addEventListener('DOMContentLoaded', function() {
                 e.stopPropagation();
             }
         });
+        
     }
+document.addEventListener("DOMContentLoaded", function () {
+    const pageLinks = {
+        "home-link": Pages.PAGES.HOME,
+        "products-link": Pages.PAGES.PRODUCTS,
+        "support-link": Pages.PAGES.SUPPORT,
+        "dashboard-link": Pages.PAGES.DASHBOARD,
+        "account-link": Pages.PAGES.DASHBOARD,
+        "cart-link": Pages.PAGES.CART,
+    };
+
+    Object.entries(pageLinks).forEach(([className, page]) => {
+        document.querySelectorAll(`.${className}`).forEach(link => {
+            link.addEventListener("click", function (e) {
+                e.preventDefault();
+                Pages.load(page);
+                activateNavLink(link);
+            });
+        });
+    });
+
+    function activateNavLink(activeLink) {
+        document.querySelectorAll(".footer-nav-item, .nav-links a").forEach(link => {
+            link.classList.remove("active");
+        });
+        activeLink.classList.add("active");
+    }
+});
+
 });
