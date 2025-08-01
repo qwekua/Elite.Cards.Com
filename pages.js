@@ -77,52 +77,35 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             </section>
         `,
-        DASHBOARD: `
-            <!-- Dashboard Section -->
-            <section class="dashboard" id="dashboard-section">
-                <div class="container">
-                    <h2 class="section-title">Welcome, <span class="highlight" id="username-display">User</span></h2>
-                    <div class="dashboard-grid">
-                        <div class="dashboard-card">
-                            <div class="dashboard-card-header">
-                                <h3>Account Information</h3>
-                            </div>
-                            <div class="dashboard-card-body">
-                                <div class="info-item">
-                                    <span class="info-label">Email:</span>
-                                    <span class="info-value" id="user-email">user@example.com</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Member Since:</span>
-                                    <span class="info-value" id="join-date">January 1, 2023</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Status:</span>
-                                    <span class="info-value status-active">Active</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="dashboard-card">
-                            <div class="dashboard-card-header">
-                                <h3>Recent Orders</h3>
-                            </div>
-                            <div class="dashboard-card-body">
-                                <div class="empty-state">
-                                    <i class="fas fa-shopping-bag"></i>
-                                    <p>No recent orders</p>
-                                    <button class="browse-btn" id="dashboard-browse-btn">Browse Cards</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="dashboard-actions">
-                        <button class="action-btn" id="logout-btn">
-                            <i class="fas fa-sign-out-alt"></i> Logout
-                        </button>
-                    </div>
+       DASHBOARD: `
+    <section class="dashboard">
+        <div class="container">
+            <h2 class="section-title">Admin Dashboard</h2>
+            <!-- Dashboard content here -->
+        </div>
+    </section>
+
+    <!-- 👇 About section inside dashboard -->
+    <section class="about" id="about-section">
+        <div class="container">
+            <h2 class="section-title">About <span class="highlight">ElitCards</span></h2>
+            <p>ElitCards provides high-limit virtual cards with instant delivery, secure payments, and unmatched convenience. We aim to simplify online financial transactions for professionals worldwide.</p>
+            <div class="about-features">
+                <div class="feature">
+                    <i class="fas fa-shield-alt"></i>
+                    <h3>Security First</h3>
+                    <p>End-to-end encrypted systems built with your safety in mind.</p>
                 </div>
-            </section>
-        `,
+                <div class="feature">
+                    <i class="fas fa-clock"></i>
+                    <h3>Instant Issuance</h3>
+                    <p>Virtual cards delivered immediately after payment confirmation.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+`
+
         CART: `
             <!-- Cart Section -->
             <section class="cart" id="cart-section">
