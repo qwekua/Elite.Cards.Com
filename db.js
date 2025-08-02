@@ -155,35 +155,78 @@ class Database {
      * @returns {Array} Array of fallback product objects
      */
     getFallbackProducts() {
-        return [
-            {
-                id: "fallback-1",
-                title: "Elite Visa Black Card",
-                description: "Premium black card with unlimited spending power",
-                number: "XXXX XXXX XXXX 1234",
-                limit: "Unlimited",
-                price: 299.99,
-                image: "images/card1.png"
-            },
-            {
-                id: "fallback-2",
-                title: "Elite Mastercard Gold",
-                description: "Gold card with $50,000 spending limit",
-                number: "XXXX XXXX XXXX 5678",
-                limit: "$50,000",
-                price: 199.99,
-                image: "images/card2.png"
-            },
-            {
-                id: "fallback-3",
-                title: "Elite Amex Platinum",
-                description: "Platinum card with $100,000 spending limit",
-                number: "XXXX XXXX XXXX 9012",
-                limit: "$100,000",
-                price: 249.99,
-                image: "images/card3.png"
-            }
+        const products = [
+            // Set 1 - $35 pricing
+            {id: 1, title: "Mastercard Platinum", price: 35, image: "images/mastercard_platinum.jpg"},
+            {id: 2, title: "Visa Gold", price: 35, image: "images/visa_gold.jpg"},
+            {id: 3, title: "American Express", price: 35, image: "images/american_express.jpg"},
+            {id: 4, title: "Visa Infinite", price: 35, image: "images/visa_infinite.jpg"},
+            {id: 5, title: "Titanium Discover", price: 35, image: "images/titanium_discover.jpg"},
+            
+            // Set 2 - $50 pricing
+            {id: 6, title: "Mastercard Platinum", price: 50, image: "images/mastercard_platinum.jpg"},
+            {id: 7, title: "Visa Gold", price: 50, image: "images/visa_gold.jpg"},
+            {id: 8, title: "American Express", price: 50, image: "images/american_express.jpg"},
+            {id: 9, title: "Visa Infinite", price: 50, image: "images/visa_infinite.jpg"},
+            {id: 10, title: "Titanium Discover", price: 50, image: "images/titanium_discover.jpg"},
+            
+            // Set 3 - $70 pricing
+            {id: 11, title: "Mastercard Platinum", price: 70, image: "images/mastercard_platinum.jpg"},
+            {id: 12, title: "Visa Gold", price: 70, image: "images/visa_gold.jpg"},
+            {id: 13, title: "American Express", price: 70, image: "images/american_express.jpg"},
+            {id: 14, title: "Visa Infinite", price: 70, image: "images/visa_infinite.jpg"},
+            {id: 15, title: "Titanium Discover", price: 70, image: "images/titanium_discover.jpg"},
+            
+            // Set 4 - $100 and $200 pricing
+            {id: 16, title: "Mastercard Platinum", price: 100, image: "images/mastercard_platinum.jpg"},
+            {id: 17, title: "Visa Gold", price: 100, image: "images/visa_gold.jpg"},
+            {id: 18, title: "American Express", price: 100, image: "images/american_express.jpg"},
+            {id: 19, title: "Visa Infinite", price: 200, image: "images/visa_infinite.jpg"},
+            {id: 20, title: "Titanium Discover", price: 200, image: "images/titanium_discover.jpg"}
         ];
+
+        // Transform to match expected format with additional fields
+        return products.map(product => ({
+            id: product.id.toString(), // Convert to string for consistency
+            title: product.title,
+            description: this.generateDescription(product.title, product.price),
+            number: "XXXX XXXX XXXX " + Math.floor(Math.random() * 9000 + 1000),
+            limit: this.generateLimit(product.price),
+            price: product.price,
+            image: product.image
+        }));
+    }
+
+    /**
+     * Generate description based on card title and price
+     * @param {string} title - Card title
+     * @param {number} price - Card price
+     * @returns {string} Generated description
+     */
+    generateDescription(title, price) {
+        const descriptions = {
+            "Mastercard Platinum": "Premium Mastercard Platinum with exclusive benefits and worldwide acceptance",
+            "Visa Gold": "Elite Visa Gold card with premium rewards and luxury perks",
+            "American Express": "Prestigious American Express card with unmatched prestige and benefits",
+            "Visa Infinite": "Ultimate Visa Infinite card with unlimited possibilities and premium services",
+            "Titanium Discover": "Exclusive Titanium Discover card with cashback rewards and premium features"
+        };
+        
+        return descriptions[title] || `Premium ${title} card with exclusive benefits`;
+    }
+
+    /**
+     * Generate spending limit based on price
+     * @param {number} price - Card price
+     * @returns {string} Generated limit
+     */
+    generateLimit(price) {
+        if (price >= 200) return "Unlimited";
+        if (price >= 100) return "$500,000";
+        if (price >= 70) return "$200,000";
+        if (price >= 50) return "$100,000";
+        if (price >= 35) return "$50,000";
+        return "$25,000";
     }
 
     /**
