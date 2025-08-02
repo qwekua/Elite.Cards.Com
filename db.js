@@ -7,14 +7,56 @@
 
 class Database {
     constructor() {
-        // Initialize PocketBase - use HTTP since the server doesn't support HTTPS
-        // This will only work when the site is served over HTTP
-        this.pb = new PocketBase('http://node68.lunes.host:3246');
+        // Configure PocketBase URL based on environment
+        this.pocketbaseUrl = this.getPocketBaseUrl();
+        this.pb = new PocketBase(this.pocketbaseUrl);
         this.isHttpsContext = window.location.protocol === 'https:';
+        this.isProduction = this.isProductionEnvironment();
+        
+        console.log('🔧 Database Configuration:');
+        console.log('Environment:', this.isProduction ? 'Production' : 'Development');
+        console.log('Protocol:', window.location.protocol);
+        console.log('Host:', window.location.host);
+        console.log('PocketBase URL:', this.pocketbaseUrl);
+        
         this.initializeData();
         this.cachedProducts = null;
         this.cacheExpiry = null;
         this.CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+    }
+
+    /**
+     * Determine the appropriate PocketBase URL based on environment
+     * @returns {string} PocketBase URL
+     */
+    getPocketBaseUrl() {
+        // Your NodeLumes PocketBase server
+        const pocketbaseUrl = 'http://node68.lunes.host:3246';
+        
+        // Check if we're in a hosted environment that might have HTTPS
+        const isHostedEnvironment = window.location.host !== 'localhost:8000' &&
+                                   window.location.host !== '127.0.0.1:8000' &&
+                                   !window.location.host.includes('localhost');
+        
+        if (isHostedEnvironment && this.isHttpsContext) {
+            console.warn('⚠️ HTTPS frontend detected with HTTP PocketBase server.');
+            console.warn('⚠️ This may cause mixed content issues in some browsers.');
+            console.warn('💡 Consider using a proxy or upgrading PocketBase to HTTPS.');
+        }
+        
+        return pocketbaseUrl;
+    }
+
+    /**
+     * Check if we're in a production environment
+     * @returns {boolean} True if production environment
+     */
+    isProductionEnvironment() {
+        const host = window.location.host.toLowerCase();
+        return !host.includes('localhost') &&
+               !host.includes('127.0.0.1') &&
+               !host.includes('codespace') &&
+               host !== '';
     }
 
     /**
@@ -523,6 +565,9 @@ class Database {
             console.log('🚀 Attempting to record payment in PocketBase...');
             console.log('🌐 Current protocol:', window.location.protocol);
             console.log('🔗 PocketBase URL:', this.pb.baseUrl);
+            console.log('🏠 Frontend host:', window.location.host);
+            console.log('🔒 HTTPS Context:', this.isHttpsContext);
+            console.log('🌍 Production Environment:', this.isProduction);
             
             // Create FormData for file upload - mapping to PocketBase collection fields
             const formData = new FormData();
@@ -565,12 +610,34 @@ class Database {
             pbError = error;
             console.error('❌ Failed to record payment in PocketBase:', error);
             
+            // Enhanced error handling for hosting scenarios
+            if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                console.error('🚫 Network Error - Possible causes:');
+                console.error('   • CORS policy blocking cross-origin requests');
+                console.error('   • Mixed content (HTTPS frontend → HTTP PocketBase)');
+                console.error('   • PocketBase server not accessible from hosted environment');
+                console.error('   • Network connectivity issues');
+                
+                if (this.isHttpsContext && this.pocketbaseUrl.startsWith('http:')) {
+                    console.error('⚠️ MIXED CONTENT DETECTED:');
+                    console.error('   Frontend (HTTPS) trying to connect to PocketBase (HTTP)');
+                    console.error('   This is blocked by browser security policies');
+                    console.error('💡 Solutions:');
+                    console.error('   1. Upgrade PocketBase to HTTPS');
+                    console.error('   2. Use a reverse proxy with SSL');
+                    console.error('   3. Host frontend on HTTP (development only)');
+                }
+            }
+            
             // Log detailed error information
             if (error.response) {
                 console.error('PocketBase error response:', error.response);
             }
             if (error.data) {
                 console.error('PocketBase error data:', error.data);
+            }
+            if (error.status) {
+                console.error('HTTP Status:', error.status);
             }
         }
         
