@@ -522,20 +522,24 @@ class Database {
             // Always try PocketBase first, regardless of HTTPS context
             console.log('Attempting to record payment in PocketBase...');
             
-            // Create FormData for file upload
+            // Create FormData for file upload - mapping to PocketBase collection fields
             const formData = new FormData();
-            formData.append('userEmail', paymentRecord.userEmail);
-            formData.append('amount', paymentRecord.amount.toString());
-            formData.append('currency', paymentRecord.currency);
-            formData.append('amountGHS', paymentRecord.amountGHS.toString());
-            formData.append('cartItems', paymentRecord.cartItems);
-            formData.append('status', paymentRecord.status);
-            formData.append('submittedAt', paymentRecord.submittedAt);
+            formData.append('email', paymentRecord.userEmail);
+            formData.append('name', paymentRecord.userEmail); // Use email as name for now
+            formData.append('Card_type', ''); // Empty card type to avoid validation issues
+            formData.append('note', JSON.stringify({
+                amount: paymentRecord.amount,
+                currency: paymentRecord.currency,
+                amountGHS: paymentRecord.amountGHS,
+                cartItems: JSON.parse(paymentRecord.cartItems),
+                status: paymentRecord.status,
+                submittedAt: paymentRecord.submittedAt
+            }));
             
-            // Add screenshot file if provided
+            // Add screenshot file if provided - mapping to Screenshot field
             if (paymentData.screenshot) {
                 console.log('Adding screenshot file:', paymentData.screenshot.name, paymentData.screenshot.size, 'bytes');
-                formData.append('paymentScreenshot', paymentData.screenshot);
+                formData.append('Screenshot', paymentData.screenshot);
             }
 
             // Log FormData contents for debugging
@@ -595,22 +599,33 @@ class Database {
             if (!this.isHttpsContext) {
                 // Try to fetch from PocketBase first using correct collection name
                 const resultList = await this.pb.collection('payment_proofs').getList(1, 50, {
-                    filter: `userEmail = "${userEmail}"`,
+                    filter: `email = "${userEmail}"`,
                     sort: '-created',
                 });
                 
-                payments = resultList.items.map(payment => ({
-                    pbId: payment.id,
-                    userEmail: payment.userEmail,
-                    amount: payment.amount,
-                    currency: payment.currency,
-                    amountGHS: payment.amountGHS,
-                    cartItems: JSON.parse(payment.cartItems || '[]'),
-                    status: payment.status,
-                    submittedAt: payment.submittedAt || payment.created,
-                    paymentScreenshot: payment.paymentScreenshot ?
-                        `http://node68.lunes.host:3246/api/files/payment_proofs/${payment.id}/${payment.paymentScreenshot}` : null
-                }));
+                payments = resultList.items.map(payment => {
+                    // Parse note field which contains our payment data
+                    let paymentData = {};
+                    try {
+                        paymentData = JSON.parse(payment.note || '{}');
+                    } catch (e) {
+                        console.warn('Failed to parse payment note:', payment.note);
+                        paymentData = {};
+                    }
+                    
+                    return {
+                        pbId: payment.id,
+                        userEmail: payment.email,
+                        amount: paymentData.amount || 0,
+                        currency: paymentData.currency || 'USD',
+                        amountGHS: paymentData.amountGHS || 0,
+                        cartItems: paymentData.cartItems || [],
+                        status: paymentData.status || 'pending',
+                        submittedAt: paymentData.submittedAt || payment.created,
+                        paymentScreenshot: payment.Screenshot ?
+                            `http://node68.lunes.host:3246/api/files/payment_proofs/${payment.id}/${payment.Screenshot}` : null
+                    };
+                });
             }
         } catch (error) {
             console.warn('Failed to fetch payments from PocketBase, using localStorage fallback:', error);
