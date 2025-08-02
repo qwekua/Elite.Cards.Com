@@ -427,13 +427,190 @@ class Database {
     }
 
     /**
-     * Add new user
+     * Add new user to PocketBase and localStorage
      * @param {Object} user - User object
+     * @returns {Promise<Object>} Created user object
      */
-    addUser(user) {
+    async addUser(user) {
+        try {
+            // Skip PocketBase if in HTTPS context
+            if (!this.isHttpsContext) {
+                // Try to create user in PocketBase first
+                const pbUser = await this.pb.collection('users').create({
+                    name: user.name,
+                    email: user.email,
+                    password: user.password,
+                    passwordConfirm: user.password,
+                    emailVisibility: true
+                });
+                
+                // If successful, add PocketBase ID to user object
+                user.pbId = pbUser.id;
+                user.joinDate = pbUser.created;
+            } else {
+                // Fallback for HTTPS context
+                user.joinDate = new Date().toISOString();
+            }
+        } catch (error) {
+            console.warn('Failed to create user in PocketBase, using localStorage fallback:', error);
+            user.joinDate = new Date().toISOString();
+        }
+        
+        // Always store in localStorage as fallback
         const users = this.getUsers();
         users.push(user);
         localStorage.setItem('users', JSON.stringify(users));
+        
+        return user;
+    }
+
+    /**
+     * Authenticate user with PocketBase
+     * @param {string} email - User email
+     * @param {string} password - User password
+     * @returns {Promise<Object|null>} User object or null if authentication failed
+     */
+    async authenticateUser(email, password) {
+        try {
+            // Skip PocketBase if in HTTPS context
+            if (!this.isHttpsContext) {
+                // Try PocketBase authentication first
+                const authData = await this.pb.collection('users').authWithPassword(email, password);
+                
+                if (authData.record) {
+                    const user = {
+                        pbId: authData.record.id,
+                        name: authData.record.name,
+                        email: authData.record.email,
+                        joinDate: authData.record.created
+                    };
+                    
+                    // Update localStorage with PocketBase user data
+                    this.setCurrentUser(user);
+                    return user;
+                }
+            }
+        } catch (error) {
+            console.warn('PocketBase authentication failed, trying localStorage fallback:', error);
+        }
+        
+        // Fallback to localStorage authentication
+        return this.findUser(email, password);
+    }
+
+    /**
+     * Record payment submission to PocketBase
+     * @param {Object} paymentData - Payment data object
+     * @returns {Promise<Object>} Created payment record
+     */
+    async recordPayment(paymentData) {
+        const paymentRecord = {
+            userEmail: paymentData.email,
+            amount: paymentData.amount,
+            currency: paymentData.currency || 'USD',
+            amountGHS: paymentData.amountGHS,
+            cartItems: JSON.stringify(paymentData.cartItems),
+            paymentScreenshot: paymentData.screenshot,
+            status: 'pending',
+            submittedAt: new Date().toISOString()
+        };
+
+        try {
+            // Skip PocketBase if in HTTPS context
+            if (!this.isHttpsContext) {
+                // Create FormData for file upload
+                const formData = new FormData();
+                formData.append('userEmail', paymentRecord.userEmail);
+                formData.append('amount', paymentRecord.amount);
+                formData.append('currency', paymentRecord.currency);
+                formData.append('amountGHS', paymentRecord.amountGHS);
+                formData.append('cartItems', paymentRecord.cartItems);
+                formData.append('status', paymentRecord.status);
+                formData.append('submittedAt', paymentRecord.submittedAt);
+                
+                // Add screenshot file if provided
+                if (paymentData.screenshot) {
+                    formData.append('paymentScreenshot', paymentData.screenshot);
+                }
+
+                // Try to create payment record in PocketBase using correct collection name
+                const pbPayment = await this.pb.collection('payment_proofs').create(formData);
+                paymentRecord.pbId = pbPayment.id;
+                
+                console.log('Payment recorded in PocketBase:', pbPayment);
+            }
+        } catch (error) {
+            console.warn('Failed to record payment in PocketBase, using localStorage fallback:', error);
+        }
+        
+        // Always store in localStorage as fallback
+        const payments = JSON.parse(localStorage.getItem('payments')) || [];
+        payments.push(paymentRecord);
+        localStorage.setItem('payments', JSON.stringify(payments));
+        
+        return paymentRecord;
+    }
+
+    /**
+     * Get user payments from PocketBase or localStorage
+     * @param {string} userEmail - User email
+     * @returns {Promise<Array>} Array of payment records
+     */
+    async getUserPayments(userEmail) {
+        let payments = [];
+        
+        try {
+            // Skip PocketBase if in HTTPS context
+            if (!this.isHttpsContext) {
+                // Try to fetch from PocketBase first using correct collection name
+                const resultList = await this.pb.collection('payment_proofs').getList(1, 50, {
+                    filter: `userEmail = "${userEmail}"`,
+                    sort: '-created',
+                });
+                
+                payments = resultList.items.map(payment => ({
+                    pbId: payment.id,
+                    userEmail: payment.userEmail,
+                    amount: payment.amount,
+                    currency: payment.currency,
+                    amountGHS: payment.amountGHS,
+                    cartItems: JSON.parse(payment.cartItems || '[]'),
+                    status: payment.status,
+                    submittedAt: payment.submittedAt || payment.created,
+                    paymentScreenshot: payment.paymentScreenshot ?
+                        `http://node68.lunes.host:3246/api/files/payment_proofs/${payment.id}/${payment.paymentScreenshot}` : null
+                }));
+            }
+        } catch (error) {
+            console.warn('Failed to fetch payments from PocketBase, using localStorage fallback:', error);
+        }
+        
+        // Fallback to localStorage
+        if (payments.length === 0) {
+            const localPayments = JSON.parse(localStorage.getItem('payments')) || [];
+            payments = localPayments.filter(payment => payment.userEmail === userEmail);
+        }
+        
+        return payments;
+    }
+
+    /**
+     * Get recent orders for display in user dashboard
+     * @param {string} userEmail - User email
+     * @returns {Promise<Array>} Array of recent order records
+     */
+    async getRecentOrders(userEmail) {
+        const payments = await this.getUserPayments(userEmail);
+        
+        // Transform payments into order format for display
+        return payments.map(payment => ({
+            id: payment.pbId || `local_${Date.now()}_${Math.random()}`,
+            date: new Date(payment.submittedAt).toLocaleDateString(),
+            items: payment.cartItems,
+            total: `$${payment.amount} (GHS ${payment.amountGHS})`,
+            status: payment.status,
+            paymentScreenshot: payment.paymentScreenshot
+        })).slice(0, 5); // Show only last 5 orders
     }
 
     /**

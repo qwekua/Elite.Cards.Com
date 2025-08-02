@@ -265,6 +265,137 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Handle payment confirmation with PocketBase integration
+    async function handlePaymentConfirmation() {
+        const paymentEmail = document.getElementById('payment-email');
+        const paymentScreenshot = document.getElementById('payment-screenshot');
+        
+        if (!paymentEmail || !paymentEmail.value) {
+            showNotification('Please enter your email address', 'error');
+            return;
+        }
+        
+        if (!paymentScreenshot || !paymentScreenshot.files[0]) {
+            showNotification('Please upload payment screenshot', 'error');
+            return;
+        }
+
+        try {
+            // Show loading state
+            const confirmBtn = document.getElementById('confirm-payment-btn');
+            const originalText = confirmBtn.textContent;
+            confirmBtn.textContent = 'Processing...';
+            confirmBtn.disabled = true;
+
+            // Get cart data
+            const cart = db.getCart();
+            const products = await db.getProducts();
+            const subtotal = await db.getCartSubtotal();
+            const serviceFee = 1;
+            const totalAmount = subtotal + serviceFee;
+
+            // Prepare cart items for recording
+            const cartItems = cart.map(item => {
+                const product = products.find(p => p.id === item.id);
+                return {
+                    id: item.id,
+                    title: product ? product.title : 'Unknown Product',
+                    price: product ? product.price : 0,
+                    quantity: item.quantity,
+                    total: product ? product.price * item.quantity : 0
+                };
+            });
+
+            // Prepare payment data
+            const paymentData = {
+                email: paymentEmail.value,
+                amount: totalAmount,
+                currency: 'USD',
+                amountGHS: parseFloat(db.usdToGhs(totalAmount)),
+                cartItems: cartItems,
+                screenshot: paymentScreenshot.files[0]
+            };
+
+            // Record payment in PocketBase
+            const paymentRecord = await db.recordPayment(paymentData);
+            
+            console.log('Payment recorded:', paymentRecord);
+
+            // Reset button state
+            confirmBtn.textContent = originalText;
+            confirmBtn.disabled = false;
+
+            // Hide payment modal and show success modal
+            hideModal(document.getElementById('payment-modal'));
+            setTimeout(() => {
+                showModal(document.getElementById('success-modal'));
+                // Clear cart after successful payment
+                db.clearCart();
+                updateCartCount();
+            }, 500);
+
+            showNotification('Payment submitted successfully!', 'success');
+
+        } catch (error) {
+            console.error('Payment recording error:', error);
+            
+            // Reset button state
+            const confirmBtn = document.getElementById('confirm-payment-btn');
+            confirmBtn.textContent = 'Confirm Payment';
+            confirmBtn.disabled = false;
+            
+            showNotification('Payment submission failed. Please try again.', 'error');
+        }
+    
+        // Load and display recent orders
+        async function loadRecentOrders(userEmail) {
+            const recentOrdersContainer = document.getElementById('recent-orders');
+            if (!recentOrdersContainer) return;
+    
+            try {
+                const orders = await db.getRecentOrders(userEmail);
+                
+                if (orders.length === 0) {
+                    recentOrdersContainer.innerHTML = `
+                        <div class="no-orders">
+                            <i class="fas fa-shopping-bag"></i>
+                            <p>No recent orders</p>
+                            <button class="browse-btn" id="dashboard-browse-btn">Browse Cards</button>
+                        </div>
+                    `;
+                } else {
+                    recentOrdersContainer.innerHTML = orders.map(order => `
+                        <div class="order-item">
+                            <div class="order-header">
+                                <span class="order-id">Order #${order.id.substring(0, 8)}</span>
+                                <span class="order-date">${order.date}</span>
+                            </div>
+                            <div class="order-details">
+                                <div class="order-items">
+                                    ${order.items.map(item => `
+                                        <span class="item-name">${item.title} x${item.quantity}</span>
+                                    `).join(', ')}
+                                </div>
+                                <div class="order-total">${order.total}</div>
+                            </div>
+                            <div class="order-status">
+                                <span class="status status-${order.status}">${order.status.charAt(0).toUpperCase() + order.status.slice(1)}</span>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading recent orders:', error);
+                recentOrdersContainer.innerHTML = `
+                    <div class="no-orders">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Failed to load orders</p>
+                    </div>
+                `;
+            }
+        }
+    }
+
     // Show notification
     function showNotification(message, type) {
         notification.textContent = message;
@@ -314,44 +445,53 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Login user
-    function login(email, password) {
-        const user = db.findUser(email, password);
-        
-        if (user) {
-            db.setCurrentUser(user);
-            checkAuthState();
-            hideModal(document.getElementById('auth-modal'));
-            showNotification('Login successful', 'success');
-            showSection('dashboard-section');
-        } else {
-            showNotification('Invalid email or password', 'error');
+    // Login user with PocketBase integration
+    async function login(email, password) {
+        try {
+            const user = await db.authenticateUser(email, password);
+            
+            if (user) {
+                checkAuthState();
+                hideModal(document.getElementById('auth-modal'));
+                showNotification('Login successful', 'success');
+                showSection('dashboard-section');
+            } else {
+                showNotification('Invalid email or password', 'error');
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            showNotification('Login failed. Please try again.', 'error');
         }
     }
 
-    // Register user
-    function register(name, email, password) {
-        // Check if user already exists
-        if (db.userExists(email)) {
-            showNotification('Email already registered', 'error');
-            return;
-        }
-        
-        // Create new user
-        const newUser = {
-            name,
-            email,
-            password,
+    // Register user with PocketBase integration
+    async function register(name, email, password) {
+        try {
+            // Check if user already exists
+            if (db.userExists(email)) {
+                showNotification('Email already registered', 'error');
+                return;
+            }
             
-        };
-        
-        db.addUser(newUser);
-        db.setCurrentUser(newUser);
-        
-        checkAuthState();
-        hideModal(document.getElementById('auth-modal'));
-        showNotification('Registration successful', 'success');
-        showSection('dashboard-section');
+            // Create new user
+            const newUser = {
+                name,
+                email,
+                password,
+                joinDate: new Date().toISOString()
+            };
+            
+            const createdUser = await db.addUser(newUser);
+            db.setCurrentUser(createdUser);
+            
+            checkAuthState();
+            hideModal(document.getElementById('auth-modal'));
+            showNotification('Registration successful', 'success');
+            showSection('dashboard-section');
+        } catch (error) {
+            console.error('Registration error:', error);
+            showNotification('Registration failed. Please try again.', 'error');
+        }
     }
 
     // Logout user
@@ -559,7 +699,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         // Use event delegation for dynamically loaded elements
-        document.addEventListener('click', (e) => {
+        document.addEventListener('click', async (e) => {
             // Browse cards button
             if (e.target.id === 'browse-cards-btn' || e.target.closest('#browse-cards-btn')) {
                 e.preventDefault();
@@ -594,26 +734,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Confirm payment button
             if (e.target.id === 'confirm-payment-btn' || e.target.closest('#confirm-payment-btn')) {
                 e.preventDefault();
-                const paymentEmail = document.getElementById('payment-email');
-                const paymentScreenshot = document.getElementById('payment-screenshot');
-                
-                if (!paymentEmail || !paymentEmail.value) {
-                    showNotification('Please enter your email address', 'error');
-                    return;
-                }
-                
-                if (!paymentScreenshot || !paymentScreenshot.files[0]) {
-                    showNotification('Please upload payment screenshot', 'error');
-                    return;
-                }
-                
-                hideModal(document.getElementById('payment-modal'));
-                setTimeout(() => {
-                    showModal(document.getElementById('success-modal'));
-                    // Clear cart after successful payment
-                    db.clearCart();
-                    updateCartCount();
-                }, 500);
+                await handlePaymentConfirmation();
             }
             
             // Logout button
@@ -714,13 +835,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         // Form submissions - using event delegation
-        document.addEventListener('submit', (e) => {
+        document.addEventListener('submit', async (e) => {
             // Login form
             if (e.target.id === 'login-form') {
                 e.preventDefault();
                 const email = document.getElementById('login-email').value;
                 const password = document.getElementById('login-password').value;
-                login(email, password);
+                await login(email, password);
             }
             
             // Register form
@@ -736,7 +857,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     return;
                 }
                 
-                register(name, email, password);
+                await register(name, email, password);
             }
         });
 

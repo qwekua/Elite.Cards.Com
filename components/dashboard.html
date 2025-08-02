@@ -14,9 +14,24 @@
                 </ul>
             </div>
             <div class="dashboard-content">
-                <h3>Your Profile</h3>
-                <p>Email: <span id="user-email"></span></p>
-                <p>Member since: <span id="join-date"></span></p>
+                <div class="dashboard-cards">
+                    <div class="dashboard-card">
+                        <h3>Account Information</h3>
+                        <p>Email: <span id="user-email"></span></p>
+                        <p>Status: <span class="status-active">Active</span></p>
+                    </div>
+                    
+                    <div class="dashboard-card">
+                        <h3>Recent Orders</h3>
+                        <div id="recent-orders">
+                            <div class="no-orders">
+                                <i class="fas fa-shopping-bag"></i>
+                                <p>No recent orders</p>
+                                <button class="browse-btn" id="dashboard-browse-btn">Browse Cards</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
