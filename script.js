@@ -165,9 +165,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const cartTotal = document.getElementById('cart-total');
         const paymentAmount = document.getElementById('payment-amount');
         
-        if (cartSubtotal) cartSubtotal.textContent = db.formatPrice(subtotal);
-        if (cartTotal) cartTotal.textContent = db.formatPrice(subtotal + 1); // Adding $1 service fee
-        if (paymentAmount) paymentAmount.textContent = db.formatPrice(subtotal + 1);
+        const serviceFee = 1; // $1 service fee
+        const totalAmount = subtotal + serviceFee;
+        
+        if (cartSubtotal) cartSubtotal.textContent = `${db.formatPrice(subtotal)} (GHS ${db.usdToGhs(subtotal)})`;
+        if (cartTotal) cartTotal.textContent = `${db.formatPrice(totalAmount)} (GHS ${db.usdToGhs(totalAmount)})`;
+        if (paymentAmount) paymentAmount.textContent = `${db.formatPrice(totalAmount)} (GHS ${db.usdToGhs(totalAmount)})`;
         
         cartSummary.style.display = 'block';
     }
@@ -248,6 +251,18 @@ document.addEventListener('DOMContentLoaded', function() {
         updateCartCount();
         await renderCart();
         showNotification('Item removed from cart', 'success');
+    }
+
+    // Update payment amount in modal
+    async function updatePaymentAmount() {
+        const subtotal = await db.getCartSubtotal();
+        const serviceFee = 1;
+        const totalAmount = subtotal + serviceFee;
+        
+        const paymentAmount = document.getElementById('payment-amount');
+        if (paymentAmount) {
+            paymentAmount.textContent = `${db.formatPrice(totalAmount)} (GHS ${db.usdToGhs(totalAmount)})`;
+        }
     }
 
     // Show notification
@@ -569,6 +584,10 @@ document.addEventListener('DOMContentLoaded', function() {
             // Checkout button
             if (e.target.id === 'checkout-btn' || e.target.closest('#checkout-btn')) {
                 e.preventDefault();
+                
+                // Update payment amount in modal
+                updatePaymentAmount();
+                
                 showModal(document.getElementById('payment-modal'));
             }
             

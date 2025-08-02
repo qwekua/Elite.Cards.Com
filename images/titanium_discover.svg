@@ -1,0 +1,18 @@
+<svg width="400" height="250" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="titaniumGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B5CF6;stop-opacity:1" />
+      <stop offset="25%" style="stop-color:#06B6D4;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#10B981;stop-opacity:1" />
+      <stop offset="75%" style="stop-color:#F59E0B;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#EF4444;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="400" height="250" rx="15" fill="url(#titaniumGradient)"/>
+  <text x="300" y="40" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="white">TITANIUM</text>
+  <rect x="30" y="80" width="60" height="45" rx="8" fill="rgba(255,255,255,0.3)" stroke="white" stroke-width="2"/>
+  <text x="30" y="140" font-family="Arial, sans-serif" font-size="18" fill="white">**** **** **** 1234</text>
+  <text x="30" y="170" font-family="Arial, sans-serif" font-size="12" fill="white">VALID THRU 09/28</text>
+  <text x="30" y="200" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="white">BRIAN SCOTT</text>
+  <text x="300" y="220" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="white">DISCOVER</text>
+</svg>

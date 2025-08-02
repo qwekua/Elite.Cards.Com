@@ -157,32 +157,32 @@ class Database {
     getFallbackProducts() {
         const products = [
             // Set 1 - $35 pricing
-            {id: 1, title: "Mastercard Platinum", price: 35, image: "images/mastercard_platinum.jpg"},
-            {id: 2, title: "Visa Gold", price: 35, image: "images/visa_gold.jpg"},
-            {id: 3, title: "American Express", price: 35, image: "images/american_express.jpg"},
-            {id: 4, title: "Visa Infinite", price: 35, image: "images/visa_infinite.jpg"},
-            {id: 5, title: "Titanium Discover", price: 35, image: "images/titanium_discover.jpg"},
+            {id: 1, title: "Titanium Discover", price: 35, image: "images/titanium_discover.svg"},
+            {id: 2, title: "Visa Infinite", price: 35, image: "images/visa_infinite.svg"},
+            {id: 3, title: "Visa Infinite Black", price: 35, image: "images/visa_infinite_black.svg"},
+            {id: 4, title: "Mastercard Platinum", price: 35, image: "images/mastercard_platinum.svg"},
+            {id: 5, title: "Visa Gold", price: 35, image: "images/visa_gold.svg"},
             
             // Set 2 - $50 pricing
-            {id: 6, title: "Mastercard Platinum", price: 50, image: "images/mastercard_platinum.jpg"},
-            {id: 7, title: "Visa Gold", price: 50, image: "images/visa_gold.jpg"},
-            {id: 8, title: "American Express", price: 50, image: "images/american_express.jpg"},
-            {id: 9, title: "Visa Infinite", price: 50, image: "images/visa_infinite.jpg"},
-            {id: 10, title: "Titanium Discover", price: 50, image: "images/titanium_discover.jpg"},
+            {id: 6, title: "Titanium Discover", price: 50, image: "images/titanium_discover.svg"},
+            {id: 7, title: "Visa Infinite", price: 50, image: "images/visa_infinite.svg"},
+            {id: 8, title: "Visa Infinite Black", price: 50, image: "images/visa_infinite_black.svg"},
+            {id: 9, title: "Mastercard Platinum", price: 50, image: "images/mastercard_platinum.svg"},
+            {id: 10, title: "Visa Gold", price: 50, image: "images/visa_gold.svg"},
             
             // Set 3 - $70 pricing
-            {id: 11, title: "Mastercard Platinum", price: 70, image: "images/mastercard_platinum.jpg"},
-            {id: 12, title: "Visa Gold", price: 70, image: "images/visa_gold.jpg"},
-            {id: 13, title: "American Express", price: 70, image: "images/american_express.jpg"},
-            {id: 14, title: "Visa Infinite", price: 70, image: "images/visa_infinite.jpg"},
-            {id: 15, title: "Titanium Discover", price: 70, image: "images/titanium_discover.jpg"},
+            {id: 11, title: "Titanium Discover", price: 70, image: "images/titanium_discover.svg"},
+            {id: 12, title: "Visa Infinite", price: 70, image: "images/visa_infinite.svg"},
+            {id: 13, title: "Visa Infinite Black", price: 70, image: "images/visa_infinite_black.svg"},
+            {id: 14, title: "Mastercard Platinum", price: 70, image: "images/mastercard_platinum.svg"},
+            {id: 15, title: "Visa Gold", price: 70, image: "images/visa_gold.svg"},
             
             // Set 4 - $100 and $200 pricing
-            {id: 16, title: "Mastercard Platinum", price: 100, image: "images/mastercard_platinum.jpg"},
-            {id: 17, title: "Visa Gold", price: 100, image: "images/visa_gold.jpg"},
-            {id: 18, title: "American Express", price: 100, image: "images/american_express.jpg"},
-            {id: 19, title: "Visa Infinite", price: 200, image: "images/visa_infinite.jpg"},
-            {id: 20, title: "Titanium Discover", price: 200, image: "images/titanium_discover.jpg"}
+            {id: 16, title: "Titanium Discover", price: 100, image: "images/titanium_discover.svg"},
+            {id: 17, title: "Visa Infinite", price: 100, image: "images/visa_infinite.svg"},
+            {id: 18, title: "Visa Infinite Black", price: 100, image: "images/visa_infinite_black.svg"},
+            {id: 19, title: "Mastercard Platinum", price: 200, image: "images/mastercard_platinum.svg"},
+            {id: 20, title: "Visa Gold", price: 200, image: "images/visa_gold.svg"}
         ];
 
         // Transform to match expected format with additional fields
@@ -209,6 +209,7 @@ class Database {
             "Visa Gold": "Elite Visa Gold card with premium rewards and luxury perks",
             "American Express": "Prestigious American Express card with unmatched prestige and benefits",
             "Visa Infinite": "Ultimate Visa Infinite card with unlimited possibilities and premium services",
+            "Visa Infinite Black": "Exclusive Visa Infinite Black card with ultra-premium benefits and concierge services",
             "Titanium Discover": "Exclusive Titanium Discover card with cashback rewards and premium features"
         };
         
