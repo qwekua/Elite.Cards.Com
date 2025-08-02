@@ -30,51 +30,59 @@ document.addEventListener('DOMContentLoaded', function() {
     init();
 
     // Render products to the grid
-    function renderProducts() {
+    async function renderProducts() {
         const productsGrid = document.getElementById('products-grid');
         if (!productsGrid) {
             console.error('Products grid not found');
             return;
         }
         
-        productsGrid.innerHTML = '';
-        const products = db.getProducts();
+        // Show loading state
+        productsGrid.innerHTML = '<div class="loading-state"><i class="fas fa-spinner fa-spin"></i> Loading cards...</div>';
         
-        products.forEach(product => {
-            const productCard = document.createElement('div');
+        try {
+            const products = await db.getProducts();
+            productsGrid.innerHTML = '';
             
-            // Determine card type based on title
-            let cardType = '';
-            if (product.title.toLowerCase().includes('gold')) {
-                cardType = 'gold-card';
-            } else if (product.title.toLowerCase().includes('black')) {
-                cardType = 'black-card';
-            } else if (product.title.toLowerCase().includes('platinum')) {
-                cardType = 'platinum-card';
-            } else if (product.title.toLowerCase().includes('diamond')) {
-                cardType = 'diamond-card';
-            } else if (product.title.toLowerCase().includes('infinite')) {
-                cardType = 'infinite-card';
-            } else if (product.title.toLowerCase().includes('world')) {
-                cardType = 'world-card';
-            }
-            
-            productCard.className = `product-card ${cardType}`;
-            productCard.innerHTML = `
-                <div class="product-image">
-                    <img src="${product.image}" alt="${product.title}">
-                </div>
-                <div class="product-info">
-                    <h3 class="product-title">${product.title}</h3>
-                    <p class="product-number">${product.number}</p>
-                    <p class="product-limit">${product.limit}</p>
-                    <p class="product-price">$${product.price.toFixed(2)}</p>
-                    <p class="price-conversion">GHS ${db.usdToGhs(product.price)}</p>
-                    <button class="add-to-cart" data-id="${product.id}">Add to Cart</button>
-                </div>
-            `;
-            productsGrid.appendChild(productCard);
-        });
+            products.forEach(product => {
+                const productCard = document.createElement('div');
+                
+                // Determine card type based on title
+                let cardType = '';
+                if (product.title.toLowerCase().includes('gold')) {
+                    cardType = 'gold-card';
+                } else if (product.title.toLowerCase().includes('black')) {
+                    cardType = 'black-card';
+                } else if (product.title.toLowerCase().includes('platinum')) {
+                    cardType = 'platinum-card';
+                } else if (product.title.toLowerCase().includes('diamond')) {
+                    cardType = 'diamond-card';
+                } else if (product.title.toLowerCase().includes('infinite')) {
+                    cardType = 'infinite-card';
+                } else if (product.title.toLowerCase().includes('world')) {
+                    cardType = 'world-card';
+                }
+                
+                productCard.className = `product-card ${cardType}`;
+                productCard.innerHTML = `
+                    <div class="product-image">
+                        <img src="${product.image}" alt="${product.title}" onerror="this.src='images/default-card.png'">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">${product.title}</h3>
+                        <p class="product-number">${product.number}</p>
+                        <p class="product-limit">${product.limit}</p>
+                        <p class="product-price">$${product.price.toFixed(2)}</p>
+                        <p class="price-conversion">GHS ${db.usdToGhs(product.price)}</p>
+                        <button class="add-to-cart" data-id="${product.id}">Add to Cart</button>
+                    </div>
+                `;
+                productsGrid.appendChild(productCard);
+            });
+        } catch (error) {
+            console.error('Error rendering products:', error);
+            productsGrid.innerHTML = '<div class="error-state"><i class="fas fa-exclamation-triangle"></i> Failed to load cards. Please try again later.</div>';
+        }
     }
 
     // Update cart count in navbar and footer
@@ -85,7 +93,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Render cart items
-    function renderCart() {
+    async function renderCart() {
         const cartItems = document.getElementById('cart-items');
         const cartSummary = document.getElementById('cart-summary');
         
@@ -107,11 +115,16 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         cartItems.innerHTML = '';
-        let subtotal = db.getCartSubtotal();
-        const products = db.getProducts();
+        let subtotal = await db.getCartSubtotal();
+        const products = await db.getProducts();
 
         cart.forEach(item => {
             const product = products.find(p => p.id === item.id);
+            
+            if (!product) {
+                console.error('Product not found for cart item:', item);
+                return; // Skip this item if product not found
+            }
             
             // Determine card type based on title
             let cardType = '';
@@ -165,12 +178,51 @@ document.addEventListener('DOMContentLoaded', function() {
         updateCartCount();
         showNotification('Item added to cart', 'success');
     }
+    
+    // Clear cart function for debugging
+    function clearCart() {
+        db.clearCart();
+        updateCartCount();
+        showNotification('Cart cleared', 'success');
+        if (document.getElementById('cart-items')) {
+            renderCart();
+        }
+    }
+    
+    // Debug cart function
+    function debugCart() {
+        const cart = db.getCart();
+        const count = db.getCartCount();
+        console.log('=== CART DEBUG ===');
+        console.log('Cart contents:', cart);
+        console.log('Cart count:', count);
+        console.log('Raw localStorage cart:', localStorage.getItem('cart'));
+        console.log('==================');
+        return { cart, count, raw: localStorage.getItem('cart') };
+    }
+    
+    // Force clear cart and localStorage
+    function forceResetCart() {
+        localStorage.removeItem('cart');
+        localStorage.setItem('cart', JSON.stringify([]));
+        updateCartCount();
+        showNotification('Cart force reset complete', 'success');
+        if (document.getElementById('cart-items')) {
+            renderCart();
+        }
+        console.log('Cart force reset - new cart:', localStorage.getItem('cart'));
+    }
+    
+    // Make debugging functions available globally
+    window.clearCart = clearCart;
+    window.debugCart = debugCart;
+    window.forceResetCart = forceResetCart;
 
     // Remove from cart
-    function removeFromCart(productId) {
+    async function removeFromCart(productId) {
         db.removeFromCart(productId);
         updateCartCount();
-        renderCart();
+        await renderCart();
         showNotification('Item removed from cart', 'success');
     }
 
@@ -319,7 +371,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (sectionId === 'products-section') {
             renderProducts();
         } else if (sectionId === 'cart-section') {
-            renderCart();
+            await renderCart();
         } else if (sectionId === 'dashboard-section') {
             // Update dashboard content
             const currentUser = db.getCurrentUser();
@@ -438,12 +490,17 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
 
-        // Dashboard links
-        document.querySelectorAll('.dashboard-link').forEach(link => {
+        // Dashboard links (both desktop and mobile)
+        document.querySelectorAll('.dashboard-link, .account-link').forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
-                showSection('dashboard-section');
-                setActiveNavItem('account-link');
+                if (!db.getCurrentUser()) {
+                    showNotification('Please login to access your account', 'error');
+                    showModal(document.getElementById('auth-modal'));
+                } else {
+                    showSection('dashboard-section');
+                    setActiveNavItem('account-link');
+                }
                 closeMobileMenu();
             });
         });
@@ -455,7 +512,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     showNotification('Please login to view your cart', 'error');
                     showModal(document.getElementById('auth-modal'));
                 } else {
-                    renderCart();
                     showSection('cart-section');
                     setActiveNavItem('cart-link');
                 }
@@ -526,7 +582,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Add to cart buttons
         document.addEventListener('click', (e) => {
             if (e.target.classList.contains('add-to-cart')) {
-                const productId = parseInt(e.target.getAttribute('data-id'));
+                const productId = e.target.getAttribute('data-id'); // Keep as string for PocketBase IDs
                 addToCart(productId);
             }
         });
@@ -535,7 +591,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.addEventListener('click', (e) => {
             if (e.target.classList.contains('remove-item') || e.target.closest('.remove-item')) {
                 const button = e.target.classList.contains('remove-item') ? e.target : e.target.closest('.remove-item');
-                const productId = parseInt(button.getAttribute('data-id'));
+                const productId = button.getAttribute('data-id'); // Keep as string for PocketBase IDs
                 removeFromCart(productId);
             }
         });

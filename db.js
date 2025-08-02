@@ -1,75 +1,24 @@
 /**
  * Database Module
- * 
+ *
  * This module handles all data operations for the ElitCards application.
- * Currently uses localStorage for persistence, but designed to be easily
- * replaceable with real databases like PocketBase or SQL in the future.
+ * Integrates with PocketBase for card data and uses localStorage for cart and user sessions.
  */
 
 class Database {
     constructor() {
+        // Initialize PocketBase
+        this.pb = new PocketBase('http://node68.lunes.host:3246');
         this.initializeData();
+        this.cachedProducts = null;
+        this.cacheExpiry = null;
+        this.CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
     }
 
     /**
      * Initialize data if not already present in localStorage
      */
     initializeData() {
-        // Initialize products if not exists
-        if (!localStorage.getItem('products')) {
-            const defaultProducts = [
-                {
-                    id: 1,
-                    title: "Elite Visa Black Card",
-                    number: "XXXX XXXX XXXX 1234",
-                    limit: "Unlimited",
-                    price: 299.99,
-                    image: "images/card1.png"
-                },
-                {
-                    id: 2,
-                    title: "Elite Mastercard Gold",
-                    number: "XXXX XXXX XXXX 5678",
-                    limit: "$50,000",
-                    price: 199.99,
-                    image: "images/card2.png"
-                },
-                {
-                    id: 3,
-                    title: "Elite Amex Platinum",
-                    number: "XXXX XXXX XXXX 9012",
-                    limit: "$100,000",
-                    price: 249.99,
-                    image: "images/card3.png"
-                },
-                {
-                    id: 4,
-                    title: "Elite Discover Diamond",
-                    number: "XXXX XXXX XXXX 3456",
-                    limit: "$75,000",
-                    price: 179.99,
-                    image: "images/card4.png"
-                },
-                {
-                    id: 5,
-                    title: "Elite Visa Infinite",
-                    number: "XXXX XXXX XXXX 7890",
-                    limit: "$200,000",
-                    price: 349.99,
-                    image: "images/card5.png"
-                },
-                {
-                    id: 6,
-                    title: "Elite Mastercard World",
-                    number: "XXXX XXXX XXXX 2345",
-                    limit: "$150,000",
-                    price: 279.99,
-                    image: "images/card6.png"
-                }
-            ];
-            localStorage.setItem('products', JSON.stringify(defaultProducts));
-        }
-
         // Initialize cart if not exists
         if (!localStorage.getItem('cart')) {
             localStorage.setItem('cart', JSON.stringify([]));
@@ -103,21 +52,140 @@ class Database {
     }
 
     /**
-     * Get all products
-     * @returns {Array} Array of product objects
+     * Transform PocketBase card data to match frontend expectations
+     * @param {Object} pbCard - PocketBase card object
+     * @returns {Object} Transformed card object
      */
-    getProducts() {
-        return JSON.parse(localStorage.getItem('products')) || [];
+    transformCardData(pbCard) {
+        return {
+            id: pbCard.id,
+            title: pbCard.Name,
+            description: pbCard.Description,
+            number: "XXXX XXXX XXXX " + Math.floor(Math.random() * 9000 + 1000), // Generate random last 4 digits
+            limit: this.extractLimitFromDescription(pbCard.Description),
+            price: pbCard.Price,
+            image: pbCard.Image ? `http://node68.lunes.host:3246/api/files/Cards/${pbCard.id}/${pbCard.Image}` : "images/default-card.png"
+        };
     }
 
     /**
-     * Get product by ID
-     * @param {number} id - Product ID
-     * @returns {Object|null} Product object or null if not found
+     * Extract limit information from description
+     * @param {string} description - Card description
+     * @returns {string} Extracted limit or default
      */
-    getProductById(id) {
-        const products = this.getProducts();
-        return products.find(product => product.id === id) || null;
+    extractLimitFromDescription(description) {
+        // Try to extract limit from description, fallback to default patterns
+        const limitPatterns = [
+            /\$[\d,]+/g,
+            /unlimited/i,
+            /no limit/i
+        ];
+        
+        for (const pattern of limitPatterns) {
+            const match = description.match(pattern);
+            if (match) {
+                return match[0];
+            }
+        }
+        
+        // Default limits based on price ranges
+        const price = parseFloat(description) || 0;
+        if (price >= 300) return "Unlimited";
+        if (price >= 250) return "$200,000";
+        if (price >= 200) return "$100,000";
+        if (price >= 150) return "$75,000";
+        return "$50,000";
+    }
+
+    /**
+     * Get all products from PocketBase with caching
+     * @returns {Promise<Array>} Array of product objects
+     */
+    async getProducts() {
+        try {
+            // Check if we have valid cached data
+            if (this.cachedProducts && this.cacheExpiry && Date.now() < this.cacheExpiry) {
+                return this.cachedProducts;
+            }
+
+            // Fetch from PocketBase
+            const resultList = await this.pb.collection('Cards').getList(1, 50, {
+                sort: '-created',
+            });
+
+            // Transform the data
+            const transformedProducts = resultList.items.map(card => this.transformCardData(card));
+            
+            // Cache the results
+            this.cachedProducts = transformedProducts;
+            this.cacheExpiry = Date.now() + this.CACHE_DURATION;
+            
+            return transformedProducts;
+        } catch (error) {
+            console.error('Error fetching products from PocketBase:', error);
+            
+            // Fallback to dummy data if PocketBase fails
+            return this.getFallbackProducts();
+        }
+    }
+
+    /**
+     * Get fallback products if PocketBase is unavailable
+     * @returns {Array} Array of fallback product objects
+     */
+    getFallbackProducts() {
+        return [
+            {
+                id: "fallback-1",
+                title: "Elite Visa Black Card",
+                description: "Premium black card with unlimited spending power",
+                number: "XXXX XXXX XXXX 1234",
+                limit: "Unlimited",
+                price: 299.99,
+                image: "images/card1.png"
+            },
+            {
+                id: "fallback-2",
+                title: "Elite Mastercard Gold",
+                description: "Gold card with $50,000 spending limit",
+                number: "XXXX XXXX XXXX 5678",
+                limit: "$50,000",
+                price: 199.99,
+                image: "images/card2.png"
+            },
+            {
+                id: "fallback-3",
+                title: "Elite Amex Platinum",
+                description: "Platinum card with $100,000 spending limit",
+                number: "XXXX XXXX XXXX 9012",
+                limit: "$100,000",
+                price: 249.99,
+                image: "images/card3.png"
+            }
+        ];
+    }
+
+    /**
+     * Get product by ID from PocketBase
+     * @param {string} id - Product ID
+     * @returns {Promise<Object|null>} Product object or null if not found
+     */
+    async getProductById(id) {
+        try {
+            // First try to get from cache
+            const products = await this.getProducts();
+            const cachedProduct = products.find(product => product.id === id);
+            if (cachedProduct) {
+                return cachedProduct;
+            }
+
+            // If not in cache, fetch directly from PocketBase
+            const pbCard = await this.pb.collection('Cards').getOne(id);
+            return this.transformCardData(pbCard);
+        } catch (error) {
+            console.error('Error fetching product by ID:', error);
+            return null;
+        }
     }
 
     /**
@@ -139,11 +207,11 @@ class Database {
 
     /**
      * Calculate cart subtotal
-     * @returns {number} Cart subtotal
+     * @returns {Promise<number>} Cart subtotal
      */
-    getCartSubtotal() {
+    async getCartSubtotal() {
         const cart = this.getCart();
-        const products = this.getProducts();
+        const products = await this.getProducts();
         
         return cart.reduce((total, item) => {
             const product = products.find(p => p.id === item.id);
@@ -186,6 +254,28 @@ class Database {
      */
     clearCart() {
         localStorage.setItem('cart', JSON.stringify([]));
+    }
+
+    /**
+     * Force reset cart - completely remove and reinitialize
+     */
+    forceResetCart() {
+        localStorage.removeItem('cart');
+        localStorage.setItem('cart', JSON.stringify([]));
+    }
+
+    /**
+     * Debug cart contents
+     */
+    debugCart() {
+        const cart = this.getCart();
+        const count = this.getCartCount();
+        console.log('=== DB CART DEBUG ===');
+        console.log('Cart contents:', cart);
+        console.log('Cart count:', count);
+        console.log('Raw localStorage:', localStorage.getItem('cart'));
+        console.log('====================');
+        return { cart, count, raw: localStorage.getItem('cart') };
     }
 
     /**
