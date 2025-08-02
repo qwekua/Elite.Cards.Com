@@ -244,6 +244,40 @@ document.addEventListener('DOMContentLoaded', function() {
     window.debugCart = debugCart;
     window.forceResetCart = forceResetCart;
     window.resetAllData = resetAllData;
+    
+    // PocketBase debugging functions
+    window.testPocketBase = async function() {
+        console.log('🔍 Running PocketBase connection test...');
+        const results = await db.testPocketBaseConnection();
+        console.log('📊 Test Results:', results);
+        return results;
+    };
+    
+    window.testPaymentSubmission = async function() {
+        console.log('🧪 Running test payment submission...');
+        try {
+            const result = await db.testPaymentSubmission();
+            console.log('✅ Test payment submission successful:', result);
+            return result;
+        } catch (error) {
+            console.error('❌ Test payment submission failed:', error);
+            return { error: error.message };
+        }
+    };
+    
+    window.debugPocketBase = function() {
+        console.log('🔍 PocketBase Debug Info:');
+        console.log('URL:', db.pb.baseUrl);
+        console.log('HTTPS Context:', db.isHttpsContext);
+        console.log('Auth Token:', db.pb.authStore.token ? 'Present' : 'None');
+        console.log('Auth Model:', db.pb.authStore.model);
+        return {
+            url: db.pb.baseUrl,
+            httpsContext: db.isHttpsContext,
+            hasAuthToken: !!db.pb.authStore.token,
+            authModel: db.pb.authStore.model
+        };
+    };
 
     // Remove from cart
     async function removeFromCart(productId) {
@@ -280,12 +314,29 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
+        // Validate file type and size
+        const file = paymentScreenshot.files[0];
+        const maxSize = 10 * 1024 * 1024; // 10MB
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+        
+        if (!allowedTypes.includes(file.type)) {
+            showNotification('Please upload a valid image file (JPEG, PNG, GIF, or WebP)', 'error');
+            return;
+        }
+        
+        if (file.size > maxSize) {
+            showNotification('File size must be less than 10MB', 'error');
+            return;
+        }
+
         try {
             // Show loading state
             const confirmBtn = document.getElementById('confirm-payment-btn');
             const originalText = confirmBtn.textContent;
-            confirmBtn.textContent = 'Processing...';
+            confirmBtn.textContent = 'Uploading...';
             confirmBtn.disabled = true;
+
+            console.log('🚀 Starting payment submission process...');
 
             // Get cart data
             const cart = db.getCart();
@@ -293,6 +344,14 @@ document.addEventListener('DOMContentLoaded', function() {
             const subtotal = await db.getCartSubtotal();
             const serviceFee = 1;
             const totalAmount = subtotal + serviceFee;
+
+            console.log('📊 Payment details:', {
+                email: paymentEmail.value,
+                totalAmount,
+                cartItemCount: cart.length,
+                fileName: file.name,
+                fileSize: file.size
+            });
 
             // Prepare cart items for recording
             const cartItems = cart.map(item => {
@@ -313,17 +372,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 currency: 'USD',
                 amountGHS: parseFloat(db.usdToGhs(totalAmount)),
                 cartItems: cartItems,
-                screenshot: paymentScreenshot.files[0]
+                screenshot: file
             };
 
             // Record payment in PocketBase
             const paymentRecord = await db.recordPayment(paymentData);
             
-            console.log('Payment recorded:', paymentRecord);
+            console.log('✅ Payment submission completed:', paymentRecord);
 
             // Reset button state
             confirmBtn.textContent = originalText;
             confirmBtn.disabled = false;
+
+            // Show appropriate success message based on PocketBase success
+            if (paymentRecord.pbSuccess) {
+                showNotification('Payment submitted successfully to PocketBase!', 'success');
+                console.log('🎉 Payment successfully recorded in PocketBase with ID:', paymentRecord.pbId);
+            } else {
+                showNotification('Payment submitted (saved locally due to connection issue)', 'success');
+                console.warn('⚠️ Payment saved locally only. PocketBase error:', paymentRecord.pbError);
+            }
 
             // Hide payment modal and show success modal
             hideModal(document.getElementById('payment-modal'));
@@ -334,17 +402,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 updateCartCount();
             }, 500);
 
-            showNotification('Payment submitted successfully!', 'success');
-
         } catch (error) {
-            console.error('Payment recording error:', error);
+            console.error('❌ Payment recording error:', error);
             
             // Reset button state
             const confirmBtn = document.getElementById('confirm-payment-btn');
             confirmBtn.textContent = 'Confirm Payment';
             confirmBtn.disabled = false;
             
-            showNotification('Payment submission failed. Please try again.', 'error');
+            // Show detailed error message
+            let errorMessage = 'Payment submission failed. ';
+            if (error.message) {
+                errorMessage += error.message;
+            } else {
+                errorMessage += 'Please check your connection and try again.';
+            }
+            
+            showNotification(errorMessage, 'error');
         }
     
         // Load and display recent orders

@@ -515,38 +515,69 @@ class Database {
             submittedAt: new Date().toISOString()
         };
 
-        try {
-            // Skip PocketBase if in HTTPS context
-            if (!this.isHttpsContext) {
-                // Create FormData for file upload
-                const formData = new FormData();
-                formData.append('userEmail', paymentRecord.userEmail);
-                formData.append('amount', paymentRecord.amount);
-                formData.append('currency', paymentRecord.currency);
-                formData.append('amountGHS', paymentRecord.amountGHS);
-                formData.append('cartItems', paymentRecord.cartItems);
-                formData.append('status', paymentRecord.status);
-                formData.append('submittedAt', paymentRecord.submittedAt);
-                
-                // Add screenshot file if provided
-                if (paymentData.screenshot) {
-                    formData.append('paymentScreenshot', paymentData.screenshot);
-                }
+        let pbSuccess = false;
+        let pbError = null;
 
-                // Try to create payment record in PocketBase using correct collection name
-                const pbPayment = await this.pb.collection('payment_proofs').create(formData);
-                paymentRecord.pbId = pbPayment.id;
-                
-                console.log('Payment recorded in PocketBase:', pbPayment);
+        try {
+            // Always try PocketBase first, regardless of HTTPS context
+            console.log('Attempting to record payment in PocketBase...');
+            
+            // Create FormData for file upload
+            const formData = new FormData();
+            formData.append('userEmail', paymentRecord.userEmail);
+            formData.append('amount', paymentRecord.amount.toString());
+            formData.append('currency', paymentRecord.currency);
+            formData.append('amountGHS', paymentRecord.amountGHS.toString());
+            formData.append('cartItems', paymentRecord.cartItems);
+            formData.append('status', paymentRecord.status);
+            formData.append('submittedAt', paymentRecord.submittedAt);
+            
+            // Add screenshot file if provided
+            if (paymentData.screenshot) {
+                console.log('Adding screenshot file:', paymentData.screenshot.name, paymentData.screenshot.size, 'bytes');
+                formData.append('paymentScreenshot', paymentData.screenshot);
             }
+
+            // Log FormData contents for debugging
+            console.log('FormData contents:');
+            for (let [key, value] of formData.entries()) {
+                if (value instanceof File) {
+                    console.log(`${key}: File(${value.name}, ${value.size} bytes, ${value.type})`);
+                } else {
+                    console.log(`${key}: ${value}`);
+                }
+            }
+
+            // Try to create payment record in PocketBase
+            const pbPayment = await this.pb.collection('payment_proofs').create(formData);
+            paymentRecord.pbId = pbPayment.id;
+            pbSuccess = true;
+            
+            console.log('✅ Payment successfully recorded in PocketBase:', pbPayment);
+            
         } catch (error) {
-            console.warn('Failed to record payment in PocketBase, using localStorage fallback:', error);
+            pbError = error;
+            console.error('❌ Failed to record payment in PocketBase:', error);
+            
+            // Log detailed error information
+            if (error.response) {
+                console.error('PocketBase error response:', error.response);
+            }
+            if (error.data) {
+                console.error('PocketBase error data:', error.data);
+            }
         }
         
         // Always store in localStorage as fallback
         const payments = JSON.parse(localStorage.getItem('payments')) || [];
         payments.push(paymentRecord);
         localStorage.setItem('payments', JSON.stringify(payments));
+        
+        console.log('Payment record saved to localStorage:', paymentRecord);
+        
+        // Return success/failure information
+        paymentRecord.pbSuccess = pbSuccess;
+        paymentRecord.pbError = pbError?.message || null;
         
         return paymentRecord;
     }
@@ -621,6 +652,104 @@ class Database {
         localStorage.setItem('exchangeRate', JSON.stringify({
             usdToGhs: rate
         }));
+    }
+
+    /**
+     * Test PocketBase connection and collection access
+     * @returns {Promise<Object>} Connection test results
+     */
+    async testPocketBaseConnection() {
+        const results = {
+            connectionTest: false,
+            collectionAccess: false,
+            error: null,
+            details: {}
+        };
+
+        try {
+            console.log('🔍 Testing PocketBase connection...');
+            console.log('PocketBase URL:', this.pb.baseUrl);
+            
+            // Test basic connection by trying to get health status
+            try {
+                const health = await this.pb.health.check();
+                results.connectionTest = true;
+                results.details.health = health;
+                console.log('✅ PocketBase connection successful:', health);
+            } catch (healthError) {
+                console.log('❌ PocketBase health check failed:', healthError);
+                results.details.healthError = healthError.message;
+            }
+
+            // Test collection access
+            try {
+                console.log('🔍 Testing payment_proofs collection access...');
+                const collections = await this.pb.collections.getList(1, 10);
+                results.details.collections = collections.items.map(c => ({ id: c.id, name: c.name, type: c.type }));
+                
+                const paymentProofsCollection = collections.items.find(c => c.name === 'payment_proofs');
+                if (paymentProofsCollection) {
+                    console.log('✅ payment_proofs collection found:', paymentProofsCollection);
+                    results.collectionAccess = true;
+                    results.details.paymentProofsCollection = paymentProofsCollection;
+                } else {
+                    console.log('❌ payment_proofs collection not found');
+                    console.log('Available collections:', collections.items.map(c => c.name));
+                    results.details.availableCollections = collections.items.map(c => c.name);
+                }
+            } catch (collectionError) {
+                console.log('❌ Collection access failed:', collectionError);
+                results.details.collectionError = collectionError.message;
+            }
+
+        } catch (error) {
+            console.error('❌ PocketBase connection test failed:', error);
+            results.error = error.message;
+            results.details.generalError = error;
+        }
+
+        console.log('🔍 PocketBase test results:', results);
+        return results;
+    }
+
+    /**
+     * Create a test payment record to verify functionality
+     * @returns {Promise<Object>} Test result
+     */
+    async testPaymentSubmission() {
+        console.log('🧪 Testing payment submission...');
+        
+        // Create a test file blob
+        const testImageData = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
+        const response = await fetch(testImageData);
+        const blob = await response.blob();
+        const testFile = new File([blob], 'test-screenshot.png', { type: 'image/png' });
+
+        const testPaymentData = {
+            email: 'test@example.com',
+            amount: 10.00,
+            currency: 'USD',
+            amountGHS: 125.00,
+            cartItems: [
+                {
+                    id: 'test-1',
+                    title: 'Test Card',
+                    price: 9.00,
+                    quantity: 1,
+                    total: 9.00
+                }
+            ],
+            screenshot: testFile
+        };
+
+        try {
+            const result = await this.recordPayment(testPaymentData);
+            console.log('🧪 Test payment submission result:', result);
+            return result;
+        } catch (error) {
+            console.error('🧪 Test payment submission failed:', error);
+            throw error;
+        }
     }
 }
 
