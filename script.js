@@ -545,9 +545,10 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // Payment screenshot upload - using event delegation
+        // Payment screenshot upload - using event delegation for the new upload button
         document.addEventListener('click', (e) => {
-            if (e.target.closest('#upload-section')) {
+            if (e.target.classList.contains('upload-btn') || e.target.closest('.upload-btn')) {
+                e.preventDefault();
                 const paymentScreenshot = document.getElementById('payment-screenshot');
                 if (paymentScreenshot) {
                     paymentScreenshot.click();
@@ -562,6 +563,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (file) {
                     const previewImage = document.getElementById('preview-image');
                     const confirmPaymentBtn = document.getElementById('confirm-payment-btn');
+                    const fileName = document.getElementById('file-name');
+                    
+                    if (file && fileName) {
+                        fileName.textContent = `Selected: ${file.name}`;
+                    }
                     
                     if (previewImage && confirmPaymentBtn) {
                         const reader = new FileReader();

@@ -47,50 +47,78 @@
 
 <!-- Payment Modal -->
 <div class="modal-overlay" id="payment-modal">
-    <div class="modal">
+    <div class="modal payment-modal">
         <span class="close-modal">&times;</span>
-        <div class="payment-header">
-            <h2><span class="highlight">MoMo</span> Payments [For Ghanaians Only]</h2>
-            <p>Send e-money to complete your purchase</p>
+        
+        <!-- Teal Header -->
+        <div class="payment-header-teal">
+            <h2>MoMo Payments [For Ghanaians Only]</h2>
         </div>
         
-        <div class="payment-steps">
-            <h3>Send e-money</h3>
-            <ol>
-                <li>Dial <strong>*170#</strong></li>
-                <li>Select <strong>1. Send Money</strong></li>
-                <li>Select recipient type</li>
-                <li>Follow prompts</li>
-            </ol>
-        </div>
-        
-        <div class="payment-guide">
-            <p><span class="highlight">NB:</span> Use Your name  as your payment reference.</p>
-            <p><span class="highlight">Follow the steps above to make payment</span></p>
-            <p><span class="highlight">VODAFONE CASH (Ghanaian Admin) 050 677 1158</span></p>
-            <p><span class="highlight">Account Name: PHILOMINA APPOH</span></p>
-        </div>
-        
-        <div class="payment-details">
-            <p>Amount to pay: <span class="amount" id="payment-amount">$0.00 (GHS 0.00)</span></p>
-        </div>
-        
-        <div class="form-group">
-            <label for="payment-email">Email Address *</label>
-            <input type="email" id="payment-email" placeholder="E.g. john@doe.com" required>
-        </div>
-        
-        <div class="upload-section" id="upload-section">
-            <div class="upload-icon">
-                <i class="fas fa-cloud-upload-alt"></i>
+        <!-- Main Content Area -->
+        <div class="payment-content">
+            <!-- Money Icon and Instructions Section -->
+            <div class="payment-instructions-section">
+                <div class="money-icon-container">
+                    <div class="money-icon">
+                        <div class="money-bills">
+                            <div class="bill bill-1"></div>
+                            <div class="bill bill-2"></div>
+                            <div class="bill bill-3"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="instructions-container">
+                    <h3>Send e-money</h3>
+                    <ol>
+                        <li>Dial <strong>*170#</strong></li>
+                        <li>Select <strong>1: Send Money</strong></li>
+                        <li>Select recipient type</li>
+                        <li>Follow prompts</li>
+                    </ol>
+                </div>
             </div>
-            <p class="upload-text">Click on icon below to upload payment screenshot</p>
-            <button class="upload-btn">Select File</button>
-            <input type="file" id="payment-screenshot" accept="image/*">
-            <img src="" alt="Preview" class="preview-image" id="preview-image">
+            
+            <!-- Guide Section -->
+            <div class="payment-guide-section">
+                <h4>GUIDE</h4>
+                <p><strong>NB:</strong> Use Invoice Number "<span class="invoice-number" id="invoice-number">ML629C154.161.152.1278</span>" as your payment reference.</p>
+                
+                <!-- Green Highlighted Box -->
+                <div class="payment-details-box">
+                    <ul>
+                        <li>Follow the steps above to make payment</li>
+                        <li><strong>VODAFONE CASH (Ghanaian Admin)</strong> <span class="phone-number">0506104018</span></li>
+                        <li><strong>Account Name: CHARITY NASHIMONG</strong></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Upload Section -->
+            <div class="upload-instruction">
+                <p>Click on icon below to upload payment screenshot</p>
+            </div>
+            
+            <div class="form-group">
+                <label for="payment-email">Email Address <span class="required">*</span></label>
+                <input type="email" id="payment-email" placeholder="E.g. john@doe.com" required>
+            </div>
+            
+            <div class="upload-section" id="upload-section">
+                <label for="payment-screenshot">Upload Payment Screenshot <span class="required">*</span></label>
+                <button class="upload-btn" type="button">CHOOSE FILE</button>
+                <input type="file" id="payment-screenshot" accept="image/*" style="display: none;">
+                <div class="file-name" id="file-name"></div>
+                <img src="" alt="Preview" class="preview-image" id="preview-image" style="display: none;">
+            </div>
+            
+            <!-- Website Footer -->
+            <div class="website-footer">
+                <i class="fas fa-lock"></i>
+                <span>legitcc.shop</span>
+            </div>
         </div>
-        
-        <button class="confirm-btn" id="confirm-payment-btn" disabled>Confirm Payment</button>
     </div>
 </div>
 

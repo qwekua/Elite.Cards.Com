@@ -205,35 +205,78 @@ document.addEventListener('DOMContentLoaded', function() {
             
             <!-- Payment Modal -->
             <div class="modal-overlay" id="payment-modal">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2>Complete Your Payment</h2>
-                        <button class="close-modal">&times;</button>
+                <div class="modal payment-modal">
+                    <span class="close-modal">&times;</span>
+                    
+                    <!-- Teal Header -->
+                    <div class="payment-header-teal">
+                        <h2>MoMo Payments [For Ghanaians Only]</h2>
                     </div>
-                    <div class="modal-body">
-                        <div class="payment-details">
-                            <p>Total Amount: <span id="payment-amount">$0.00</span></p>
-                            <p>Please send the exact amount to the following Mobile Money number:</p>
-                            <div class="payment-number">
-                                <span>+233 55 123 4567</span>
-                                <button class="copy-btn" id="copy-number">
-                                    <i class="fas fa-copy"></i>
-                                </button>
+                    
+                    <!-- Main Content Area -->
+                    <div class="payment-content">
+                        <!-- Money Icon and Instructions Section -->
+                        <div class="payment-instructions-section">
+                            <div class="money-icon-container">
+                                <div class="money-icon">
+                                    <div class="money-bills">
+                                        <div class="bill bill-1"></div>
+                                        <div class="bill bill-2"></div>
+                                        <div class="bill bill-3"></div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="payment-instructions">
-                                <p>After sending the payment, please upload a screenshot of the payment confirmation:</p>
+                            
+                            <div class="instructions-container">
+                                <h3>Send e-money</h3>
+                                <ol>
+                                    <li>Dial <strong>*170#</strong></li>
+                                    <li>Select <strong>1: Send Money</strong></li>
+                                    <li>Select recipient type</li>
+                                    <li>Follow prompts</li>
+                                </ol>
                             </div>
-                            <div class="form-group">
-                                <label for="payment-email">Email (for receipt)</label>
-                                <input type="email" id="payment-email" required>
+                        </div>
+                        
+                        <!-- Guide Section -->
+                        <div class="payment-guide-section">
+                            <h4>GUIDE</h4>
+                            <p><strong>NB:</strong> Use Invoice Number "<span class="invoice-number" id="invoice-number">ML629C154.161.152.1278</span>" as your payment reference.</p>
+                            
+                            <!-- Green Highlighted Box -->
+                            <div class="payment-details-box">
+                                <ul>
+                                    <li>Follow the steps above to make payment</li>
+                                    <li><strong>VODAFONE CASH (Ghanaian Admin)</strong> <span class="phone-number">0506104018</span></li>
+                                    <li><strong>Account Name: CHARITY NASHIMONG</strong></li>
+                                </ul>
                             </div>
-                            <div class="upload-section" id="upload-section">
-                                <i class="fas fa-cloud-upload-alt"></i>
-                                <p>Click to upload payment screenshot</p>
-                                <input type="file" id="payment-screenshot" accept="image/*" style="display: none;">
-                                <img id="preview-image" src="#" alt="Preview" style="display: none; max-width: 100%; margin-top: 10px;">
-                            </div>
-                            <button class="confirm-btn" id="confirm-payment-btn" disabled>Confirm Payment</button>
+                        </div>
+                        
+                        <!-- Upload Section -->
+                        <div class="upload-instruction">
+                            <p>Click on icon below to upload payment screenshot</p>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="payment-email">Email Address <span class="required">*</span></label>
+                            <input type="email" id="payment-email" placeholder="E.g. john@doe.com" required>
+                        </div>
+                        
+                        <div class="upload-section" id="upload-section">
+                            <label for="payment-screenshot">Upload Payment Screenshot <span class="required">*</span></label>
+                            <button class="upload-btn" type="button">CHOOSE FILE</button>
+                            <input type="file" id="payment-screenshot" accept="image/*" style="display: none;">
+                            <div class="file-name" id="file-name"></div>
+                            <img src="" alt="Preview" class="preview-image" id="preview-image" style="display: none;">
+                        </div>
+                        
+                        <button class="confirm-btn" id="confirm-payment-btn" disabled>Confirm Payment</button>
+                        
+                        <!-- Website Footer -->
+                        <div class="website-footer">
+                            <i class="fas fa-lock"></i>
+                            <span>legitcc.shop</span>
                         </div>
                     </div>
                 </div>
