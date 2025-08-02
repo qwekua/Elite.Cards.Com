@@ -205,9 +205,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const userEmail = document.getElementById('user-email');
             if (userEmail) userEmail.textContent = currentUser.email;
             
-            const joinDate = document.getElementById('join-date');
-            if (joinDate) joinDate.textContent = new Date(currentUser.joinDate).toLocaleDateString();
-            
             const paymentEmail = document.getElementById('payment-email');
             if (paymentEmail) paymentEmail.value = currentUser.email;
         } else {
@@ -329,11 +326,9 @@ document.addEventListener('DOMContentLoaded', function() {
             if (currentUser) {
                 const usernameDisplay = document.getElementById('username-display');
                 const userEmail = document.getElementById('user-email');
-                const joinDate = document.getElementById('join-date');
                 
                 if (usernameDisplay) usernameDisplay.textContent = currentUser.name.split(' ')[0];
                 if (userEmail) userEmail.textContent = currentUser.email;
-                if (joinDate) joinDate.textContent = new Date(currentUser.joinDate).toLocaleDateString();
             }
         }
     }

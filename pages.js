@@ -93,10 +93,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                     <span class="info-value" id="user-email">user@example.com</span>
                                 </div>
                                 <div class="info-item">
-                                    <span class="info-label">Member Since:</span>
-                                    <span class="info-value" id="join-date">January 1, 2023</span>
-                                </div>
-                                <div class="info-item">
                                     <span class="info-label">Status:</span>
                                     <span class="info-value status-active">Active</span>
                                 </div>
