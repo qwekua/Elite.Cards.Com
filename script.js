@@ -213,10 +213,34 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Cart force reset - new cart:', localStorage.getItem('cart'));
     }
     
+    // Complete localStorage reset function
+    function resetAllData() {
+        // Clear all localStorage data
+        localStorage.clear();
+        
+        // Reinitialize database
+        db.initializeData();
+        
+        // Update cart count
+        updateCartCount();
+        
+        // Update auth state
+        checkAuthState();
+        
+        showNotification('All data reset successfully', 'success');
+        console.log('Complete data reset performed');
+        
+        // Re-render current page if needed
+        if (document.getElementById('cart-items')) {
+            renderCart();
+        }
+    }
+    
     // Make debugging functions available globally
     window.clearCart = clearCart;
     window.debugCart = debugCart;
     window.forceResetCart = forceResetCart;
+    window.resetAllData = resetAllData;
 
     // Remove from cart
     async function removeFromCart(productId) {

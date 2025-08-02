@@ -7,8 +7,10 @@
 
 class Database {
     constructor() {
-        // Initialize PocketBase
+        // Initialize PocketBase - use HTTP since the server doesn't support HTTPS
+        // This will only work when the site is served over HTTP
         this.pb = new PocketBase('http://node68.lunes.host:3246');
+        this.isHttpsContext = window.location.protocol === 'https:';
         this.initializeData();
         this.cachedProducts = null;
         this.cacheExpiry = null;
@@ -19,9 +21,22 @@ class Database {
      * Initialize data if not already present in localStorage
      */
     initializeData() {
-        // Initialize cart if not exists
-        if (!localStorage.getItem('cart')) {
+        // Initialize cart if not exists or force reset if invalid
+        const existingCart = localStorage.getItem('cart');
+        if (!existingCart) {
             localStorage.setItem('cart', JSON.stringify([]));
+        } else {
+            try {
+                const parsedCart = JSON.parse(existingCart);
+                if (!Array.isArray(parsedCart)) {
+                    // If cart is not an array, reset it
+                    localStorage.setItem('cart', JSON.stringify([]));
+                }
+            } catch (error) {
+                // If cart data is corrupted, reset it
+                console.warn('Cart data corrupted, resetting:', error);
+                localStorage.setItem('cart', JSON.stringify([]));
+            }
         }
 
         // Initialize users if not exists
@@ -108,6 +123,12 @@ class Database {
                 return this.cachedProducts;
             }
 
+            // Skip PocketBase if in HTTPS context due to mixed content restrictions
+            if (this.isHttpsContext) {
+                console.warn('Skipping PocketBase connection due to HTTPS mixed content restrictions. Using fallback data.');
+                return this.getFallbackProducts();
+            }
+
             // Fetch from PocketBase
             const resultList = await this.pb.collection('Cards').getList(1, 50, {
                 sort: '-created',
@@ -177,6 +198,12 @@ class Database {
             const cachedProduct = products.find(product => product.id === id);
             if (cachedProduct) {
                 return cachedProduct;
+            }
+
+            // Skip PocketBase if in HTTPS context
+            if (this.isHttpsContext) {
+                console.warn('Skipping PocketBase direct fetch due to HTTPS mixed content restrictions.');
+                return null;
             }
 
             // If not in cache, fetch directly from PocketBase
@@ -276,6 +303,15 @@ class Database {
         console.log('Raw localStorage:', localStorage.getItem('cart'));
         console.log('====================');
         return { cart, count, raw: localStorage.getItem('cart') };
+    }
+
+    /**
+     * Complete reset of all localStorage data
+     */
+    resetAllData() {
+        localStorage.clear();
+        this.initializeData();
+        console.log('All localStorage data reset and reinitialized');
     }
 
     /**
