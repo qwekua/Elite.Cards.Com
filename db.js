@@ -520,7 +520,9 @@ class Database {
 
         try {
             // Always try PocketBase first, regardless of HTTPS context
-            console.log('Attempting to record payment in PocketBase...');
+            console.log('🚀 Attempting to record payment in PocketBase...');
+            console.log('🌐 Current protocol:', window.location.protocol);
+            console.log('🔗 PocketBase URL:', this.pb.baseUrl);
             
             // Create FormData for file upload - mapping to PocketBase collection fields
             const formData = new FormData();
@@ -595,38 +597,36 @@ class Database {
         let payments = [];
         
         try {
-            // Skip PocketBase if in HTTPS context
-            if (!this.isHttpsContext) {
-                // Try to fetch from PocketBase first using correct collection name
-                const resultList = await this.pb.collection('payment_proofs').getList(1, 50, {
-                    filter: `email = "${userEmail}"`,
-                    sort: '-created',
-                });
+            // Always try PocketBase first, regardless of HTTPS context
+            // Try to fetch from PocketBase first using correct collection name
+            const resultList = await this.pb.collection('payment_proofs').getList(1, 50, {
+                filter: `email = "${userEmail}"`,
+                sort: '-created',
+            });
+            
+            payments = resultList.items.map(payment => {
+                // Parse note field which contains our payment data
+                let paymentData = {};
+                try {
+                    paymentData = JSON.parse(payment.note || '{}');
+                } catch (e) {
+                    console.warn('Failed to parse payment note:', payment.note);
+                    paymentData = {};
+                }
                 
-                payments = resultList.items.map(payment => {
-                    // Parse note field which contains our payment data
-                    let paymentData = {};
-                    try {
-                        paymentData = JSON.parse(payment.note || '{}');
-                    } catch (e) {
-                        console.warn('Failed to parse payment note:', payment.note);
-                        paymentData = {};
-                    }
-                    
-                    return {
-                        pbId: payment.id,
-                        userEmail: payment.email,
-                        amount: paymentData.amount || 0,
-                        currency: paymentData.currency || 'USD',
-                        amountGHS: paymentData.amountGHS || 0,
-                        cartItems: paymentData.cartItems || [],
-                        status: paymentData.status || 'pending',
-                        submittedAt: paymentData.submittedAt || payment.created,
-                        paymentScreenshot: payment.Screenshot ?
-                            `http://node68.lunes.host:3246/api/files/payment_proofs/${payment.id}/${payment.Screenshot}` : null
-                    };
-                });
-            }
+                return {
+                    pbId: payment.id,
+                    userEmail: payment.email,
+                    amount: paymentData.amount || 0,
+                    currency: paymentData.currency || 'USD',
+                    amountGHS: paymentData.amountGHS || 0,
+                    cartItems: paymentData.cartItems || [],
+                    status: paymentData.status || 'pending',
+                    submittedAt: paymentData.submittedAt || payment.created,
+                    paymentScreenshot: payment.Screenshot ?
+                        `http://node68.lunes.host:3246/api/files/payment_proofs/${payment.id}/${payment.Screenshot}` : null
+                };
+            });
         } catch (error) {
             console.warn('Failed to fetch payments from PocketBase, using localStorage fallback:', error);
         }

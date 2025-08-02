@@ -65,9 +65,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 productCard.className = `product-card ${cardType}`;
                 productCard.innerHTML = `
-                    <div class="product-image">
-                        <img src="${product.image}" alt="${product.title}" onerror="this.src='images/default-card.png'">
-                    </div>
                     <div class="product-info">
                         <h3 class="product-title">${product.title}</h3>
                         <p class="product-number">${product.number}</p>
@@ -145,9 +142,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const cartItem = document.createElement('div');
             cartItem.className = `cart-item ${cardType}-cart-item`;
             cartItem.innerHTML = `
-                <div class="cart-item-image">
-                    <img src="${product.image}" alt="${product.title}">
-                </div>
                 <div class="cart-item-details">
                     <h3>${product.title}</h3>
                     <p class="cart-item-number">${product.number}</p>
