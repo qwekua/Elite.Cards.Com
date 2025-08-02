@@ -30,18 +30,27 @@ class Database {
      * @returns {string} PocketBase URL
      */
     getPocketBaseUrl() {
-        // Your NodeLumes PocketBase server
-        const pocketbaseUrl = 'http://node68.lunes.host:3246';
+        // Determine PocketBase URL based on environment
+        const host = window.location.host.toLowerCase();
+        const isLocalDevelopment = host.includes('localhost') || host.includes('127.0.0.1') || host.includes('codespace');
         
-        // Check if we're in a hosted environment that might have HTTPS
-        const isHostedEnvironment = window.location.host !== 'localhost:8000' &&
-                                   window.location.host !== '127.0.0.1:8000' &&
-                                   !window.location.host.includes('localhost');
+        let pocketbaseUrl;
         
-        if (isHostedEnvironment && this.isHttpsContext) {
-            console.warn('⚠️ HTTPS frontend detected with HTTP PocketBase server.');
-            console.warn('⚠️ This may cause mixed content issues in some browsers.');
-            console.warn('💡 Consider using a proxy or upgrading PocketBase to HTTPS.');
+        if (isLocalDevelopment) {
+            // Use local PocketBase for development
+            pocketbaseUrl = 'http://localhost:8090';
+            console.log('🔧 Using local PocketBase for development');
+        } else {
+            // Use NodeLumes PocketBase server for production
+            pocketbaseUrl = 'http://node68.lunes.host:3246';
+            console.log('🌐 Using NodeLumes PocketBase for production');
+            
+            // Check if we're in a hosted environment that might have HTTPS
+            if (this.isHttpsContext) {
+                console.warn('⚠️ HTTPS frontend detected with HTTP PocketBase server.');
+                console.warn('⚠️ This may cause mixed content issues in some browsers.');
+                console.warn('💡 Consider using a proxy or upgrading PocketBase to HTTPS.');
+            }
         }
         
         return pocketbaseUrl;
@@ -198,33 +207,30 @@ class Database {
      */
     getFallbackProducts() {
         const products = [
-            // Set 1 - $35 pricing
-            {id: 1, title: "Titanium Discover", price: 35, image: "images/titanium_discover.svg"},
+            // Mixed pricing pattern: Big-Small-Big-Small between $35-$200
+            {id: 1, title: "Titanium Discover", price: 200, image: "images/titanium_discover.svg"},
             {id: 2, title: "Visa Infinite", price: 35, image: "images/visa_infinite.svg"},
-            {id: 3, title: "Visa Infinite Black", price: 35, image: "images/visa_infinite_black.svg"},
-            {id: 4, title: "Mastercard Platinum", price: 35, image: "images/mastercard_platinum.svg"},
-            {id: 5, title: "Visa Gold", price: 35, image: "images/visa_gold.svg"},
+            {id: 3, title: "Visa Infinite Black", price: 180, image: "images/visa_infinite_black.svg"},
+            {id: 4, title: "Mastercard Platinum", price: 45, image: "images/mastercard_platinum.svg"},
+            {id: 5, title: "Visa Gold", price: 160, image: "images/visa_gold.svg"},
             
-            // Set 2 - $50 pricing
             {id: 6, title: "Titanium Discover", price: 50, image: "images/titanium_discover.svg"},
-            {id: 7, title: "Visa Infinite", price: 50, image: "images/visa_infinite.svg"},
-            {id: 8, title: "Visa Infinite Black", price: 50, image: "images/visa_infinite_black.svg"},
-            {id: 9, title: "Mastercard Platinum", price: 50, image: "images/mastercard_platinum.svg"},
-            {id: 10, title: "Visa Gold", price: 50, image: "images/visa_gold.svg"},
+            {id: 7, title: "Visa Infinite", price: 190, image: "images/visa_infinite.svg"},
+            {id: 8, title: "Visa Infinite Black", price: 40, image: "images/visa_infinite_black.svg"},
+            {id: 9, title: "Mastercard Platinum", price: 170, image: "images/mastercard_platinum.svg"},
+            {id: 10, title: "Visa Gold", price: 55, image: "images/visa_gold.svg"},
             
-            // Set 3 - $70 pricing
-            {id: 11, title: "Titanium Discover", price: 70, image: "images/titanium_discover.svg"},
-            {id: 12, title: "Visa Infinite", price: 70, image: "images/visa_infinite.svg"},
-            {id: 13, title: "Visa Infinite Black", price: 70, image: "images/visa_infinite_black.svg"},
-            {id: 14, title: "Mastercard Platinum", price: 70, image: "images/mastercard_platinum.svg"},
-            {id: 15, title: "Visa Gold", price: 70, image: "images/visa_gold.svg"},
+            {id: 11, title: "Titanium Discover", price: 150, image: "images/titanium_discover.svg"},
+            {id: 12, title: "Visa Infinite", price: 60, image: "images/visa_infinite.svg"},
+            {id: 13, title: "Visa Infinite Black", price: 185, image: "images/visa_infinite_black.svg"},
+            {id: 14, title: "Mastercard Platinum", price: 35, image: "images/mastercard_platinum.svg"},
+            {id: 15, title: "Visa Gold", price: 175, image: "images/visa_gold.svg"},
             
-            // Set 4 - $100 and $200 pricing
-            {id: 16, title: "Titanium Discover", price: 100, image: "images/titanium_discover.svg"},
-            {id: 17, title: "Visa Infinite", price: 100, image: "images/visa_infinite.svg"},
-            {id: 18, title: "Visa Infinite Black", price: 100, image: "images/visa_infinite_black.svg"},
-            {id: 19, title: "Mastercard Platinum", price: 200, image: "images/mastercard_platinum.svg"},
-            {id: 20, title: "Visa Gold", price: 200, image: "images/visa_gold.svg"}
+            {id: 16, title: "Titanium Discover", price: 65, image: "images/titanium_discover.svg"},
+            {id: 17, title: "Visa Infinite", price: 195, image: "images/visa_infinite.svg"},
+            {id: 18, title: "Visa Infinite Black", price: 70, image: "images/visa_infinite_black.svg"},
+            {id: 19, title: "Mastercard Platinum", price: 165, image: "images/mastercard_platinum.svg"},
+            {id: 20, title: "Visa Gold", price: 75, image: "images/visa_gold.svg"}
         ];
 
         // Transform to match expected format with additional fields
