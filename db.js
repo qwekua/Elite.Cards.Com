@@ -127,7 +127,7 @@ class Database {
             id: pbCard.id,
             title: pbCard.Name,
             description: pbCard.Description,
-            number: "XXXX XXXX XXXX " + Math.floor(Math.random() * 9000 + 1000), // Generate random last 4 digits
+            number: "XXXX XXXX XXXX XXXX", // Only show asterisks, no digits
             limit: this.extractLimitFromDescription(pbCard.Description),
             price: pbCard.Price,
             image: pbCard.Image ? `http://node68.lunes.host:3246/api/files/Cards/${pbCard.id}/${pbCard.Image}` : "images/default-card.png"
@@ -207,30 +207,30 @@ class Database {
      */
     getFallbackProducts() {
         const products = [
-            // Mixed pricing pattern: Big-Small-Big-Small between $35-$200
+            // Mixed pricing pattern using only $35, $70, $100, $200
             {id: 1, title: "Titanium Discover", price: 200, image: "images/titanium_discover.svg"},
             {id: 2, title: "Visa Infinite", price: 35, image: "images/visa_infinite.svg"},
-            {id: 3, title: "Visa Infinite Black", price: 180, image: "images/visa_infinite_black.svg"},
-            {id: 4, title: "Mastercard Platinum", price: 45, image: "images/mastercard_platinum.svg"},
-            {id: 5, title: "Visa Gold", price: 160, image: "images/visa_gold.svg"},
+            {id: 3, title: "Visa Infinite Black", price: 100, image: "images/visa_infinite_black.svg"},
+            {id: 4, title: "Mastercard Platinum", price: 70, image: "images/mastercard_platinum.svg"},
+            {id: 5, title: "Visa Gold", price: 200, image: "images/visa_gold.svg"},
             
-            {id: 6, title: "Titanium Discover", price: 50, image: "images/titanium_discover.svg"},
-            {id: 7, title: "Visa Infinite", price: 190, image: "images/visa_infinite.svg"},
-            {id: 8, title: "Visa Infinite Black", price: 40, image: "images/visa_infinite_black.svg"},
-            {id: 9, title: "Mastercard Platinum", price: 170, image: "images/mastercard_platinum.svg"},
-            {id: 10, title: "Visa Gold", price: 55, image: "images/visa_gold.svg"},
+            {id: 6, title: "Titanium Discover", price: 35, image: "images/titanium_discover.svg"},
+            {id: 7, title: "Visa Infinite", price: 100, image: "images/visa_infinite.svg"},
+            {id: 8, title: "Visa Infinite Black", price: 70, image: "images/visa_infinite_black.svg"},
+            {id: 9, title: "Mastercard Platinum", price: 200, image: "images/mastercard_platinum.svg"},
+            {id: 10, title: "Visa Gold", price: 35, image: "images/visa_gold.svg"},
             
-            {id: 11, title: "Titanium Discover", price: 150, image: "images/titanium_discover.svg"},
-            {id: 12, title: "Visa Infinite", price: 60, image: "images/visa_infinite.svg"},
-            {id: 13, title: "Visa Infinite Black", price: 185, image: "images/visa_infinite_black.svg"},
+            {id: 11, title: "Titanium Discover", price: 100, image: "images/titanium_discover.svg"},
+            {id: 12, title: "Visa Infinite", price: 70, image: "images/visa_infinite.svg"},
+            {id: 13, title: "Visa Infinite Black", price: 200, image: "images/visa_infinite_black.svg"},
             {id: 14, title: "Mastercard Platinum", price: 35, image: "images/mastercard_platinum.svg"},
-            {id: 15, title: "Visa Gold", price: 175, image: "images/visa_gold.svg"},
+            {id: 15, title: "Visa Gold", price: 100, image: "images/visa_gold.svg"},
             
-            {id: 16, title: "Titanium Discover", price: 65, image: "images/titanium_discover.svg"},
-            {id: 17, title: "Visa Infinite", price: 195, image: "images/visa_infinite.svg"},
-            {id: 18, title: "Visa Infinite Black", price: 70, image: "images/visa_infinite_black.svg"},
-            {id: 19, title: "Mastercard Platinum", price: 165, image: "images/mastercard_platinum.svg"},
-            {id: 20, title: "Visa Gold", price: 75, image: "images/visa_gold.svg"}
+            {id: 16, title: "Titanium Discover", price: 70, image: "images/titanium_discover.svg"},
+            {id: 17, title: "Visa Infinite", price: 200, image: "images/visa_infinite.svg"},
+            {id: 18, title: "Visa Infinite Black", price: 35, image: "images/visa_infinite_black.svg"},
+            {id: 19, title: "Mastercard Platinum", price: 100, image: "images/mastercard_platinum.svg"},
+            {id: 20, title: "Visa Gold", price: 70, image: "images/visa_gold.svg"}
         ];
 
         // Transform to match expected format with additional fields
@@ -238,7 +238,7 @@ class Database {
             id: product.id.toString(), // Convert to string for consistency
             title: product.title,
             description: this.generateDescription(product.title, product.price),
-            number: "XXXX XXXX XXXX " + Math.floor(Math.random() * 9000 + 1000),
+            number: "XXXX XXXX XXXX XXXX",
             limit: this.generateLimit(product.price),
             price: product.price,
             image: product.image
