@@ -209,29 +209,29 @@ class Database {
     getFallbackProducts() {
         const products = [
             // Mixed pricing pattern using only $35, $70, $100, $200
-            {id: 1, title: "Titanium Discover", price: 200, image: "images/titanium_discover.svg"},
+            {id: 1, title: "Titanium Discover", price: 50, image: "images/titanium_discover.svg"},
             {id: 2, title: "Visa Infinite", price: 35, image: "images/visa_infinite.svg"},
             {id: 3, title: "Visa Infinite Black", price: 100, image: "images/visa_infinite_black.svg"},
             {id: 4, title: "Mastercard Platinum", price: 70, image: "images/mastercard_platinum.svg"},
             {id: 5, title: "Visa Gold", price: 200, image: "images/visa_gold.svg"},
             
             {id: 6, title: "Titanium Discover", price: 35, image: "images/titanium_discover.svg"},
-            {id: 7, title: "Visa Infinite", price: 100, image: "images/visa_infinite.svg"},
+            {id: 7, title: "Visa Infinite", price: 50, image: "images/visa_infinite.svg"},
             {id: 8, title: "Visa Infinite Black", price: 70, image: "images/visa_infinite_black.svg"},
             {id: 9, title: "Mastercard Platinum", price: 200, image: "images/mastercard_platinum.svg"},
-            {id: 10, title: "Visa Gold", price: 35, image: "images/visa_gold.svg"},
+            {id: 10, title: "Visa Gold", price: 100, image: "images/visa_gold.svg"},
             
             {id: 11, title: "Titanium Discover", price: 100, image: "images/titanium_discover.svg"},
             {id: 12, title: "Visa Infinite", price: 70, image: "images/visa_infinite.svg"},
             {id: 13, title: "Visa Infinite Black", price: 200, image: "images/visa_infinite_black.svg"},
             {id: 14, title: "Mastercard Platinum", price: 35, image: "images/mastercard_platinum.svg"},
-            {id: 15, title: "Visa Gold", price: 100, image: "images/visa_gold.svg"},
+            {id: 15, title: "Visa Gold", price: 50, image: "images/visa_gold.svg"},
             
             {id: 16, title: "Titanium Discover", price: 70, image: "images/titanium_discover.svg"},
-            {id: 17, title: "Visa Infinite", price: 200, image: "images/visa_infinite.svg"},
+            {id: 17, title: "Visa Infinite", price: 50, image: "images/visa_infinite.svg"},
             {id: 18, title: "Visa Infinite Black", price: 35, image: "images/visa_infinite_black.svg"},
             {id: 19, title: "Mastercard Platinum", price: 100, image: "images/mastercard_platinum.svg"},
-            {id: 20, title: "Visa Gold", price: 70, image: "images/visa_gold.svg"}
+            {id: 20, title: "Visa Gold", price: 200, image: "images/visa_gold.svg"}
         ];
 
         // Transform to match expected format with additional fields

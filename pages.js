@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Page container element
     const pageContainer = document.getElementById('component-container');
     
-    // Check if page container exists
+  comm  // Check if page container exists
     if (!pageContainer) {
         console.error('Page container not found. Element with ID "component-container" is missing.');
         return;
