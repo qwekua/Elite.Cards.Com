@@ -175,7 +175,8 @@ class Database {
             }
 
             // Skip PocketBase if in HTTPS context due to mixed content restrictions
-            if (this.isHttpsContext) {
+            // Exception: Allow connection to your specific PocketBase server
+            if (this.isHttpsContext && !this.pocketbaseUrl.includes('node68.lunes.host:3246')) {
                 console.warn('Skipping PocketBase connection due to HTTPS mixed content restrictions. Using fallback data.');
                 return this.getFallbackProducts();
             }
@@ -293,7 +294,8 @@ class Database {
             }
 
             // Skip PocketBase if in HTTPS context
-            if (this.isHttpsContext) {
+            // Exception: Allow connection to your specific PocketBase server
+            if (this.isHttpsContext && !this.pocketbaseUrl.includes('node68.lunes.host:3246')) {
                 console.warn('Skipping PocketBase direct fetch due to HTTPS mixed content restrictions.');
                 return null;
             }
@@ -482,7 +484,8 @@ class Database {
     async addUser(user) {
         try {
             // Skip PocketBase if in HTTPS context
-            if (!this.isHttpsContext) {
+            // Exception: Allow connection to your specific PocketBase server
+            if (!this.isHttpsContext || this.pocketbaseUrl.includes('node68.lunes.host:3246')) {
                 // Try to create user in PocketBase first
                 const pbUser = await this.pb.collection('users').create({
                     name: user.name,
@@ -521,7 +524,8 @@ class Database {
     async authenticateUser(email, password) {
         try {
             // Skip PocketBase if in HTTPS context
-            if (!this.isHttpsContext) {
+            // Exception: Allow connection to your specific PocketBase server
+            if (!this.isHttpsContext || this.pocketbaseUrl.includes('node68.lunes.host:3246')) {
                 // Try PocketBase authentication first
                 const authData = await this.pb.collection('users').authWithPassword(email, password);
                 
