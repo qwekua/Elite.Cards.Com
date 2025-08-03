@@ -156,11 +156,11 @@ class Database {
         
         // Default limits based on price ranges
         const price = parseFloat(description) || 0;
-        if (price >= 300) return "Unlimited";
-        if (price >= 250) return "$200,000";
-        if (price >= 200) return "$100,000";
-        if (price >= 150) return "$75,000";
-        return "$50,000";
+        if (price >= 300) return "$3,500";
+        if (price >= 250) return "$3,000";
+        if (price >= 200) return "$2,500";
+        if (price >= 150) return "$2,000";
+        return "$1,000";
     }
 
     /**
@@ -271,12 +271,12 @@ class Database {
      * @returns {string} Generated limit
      */
     generateLimit(price) {
-        if (price >= 200) return "Unlimited";
-        if (price >= 100) return "$500,000";
-        if (price >= 70) return "$200,000";
-        if (price >= 50) return "$100,000";
-        if (price >= 35) return "$50,000";
-        return "$25,000";
+        if (price >= 200) return "$3,500";
+        if (price >= 100) return "$3,000";
+        if (price >= 70) return "$2,500";
+        if (price >= 50) return "$2,000";
+        if (price >= 35) return "$1,500";
+        return "$1,000";
     }
 
     /**

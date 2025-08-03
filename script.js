@@ -64,7 +64,27 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 
                 productCard.className = `product-card ${cardType}`;
+                
+                // Determine the image source
+                let imageSrc = product.image || 'images/default-card.png';
+                
+                // Map specific card titles to their JPEG images in root directory
+                if (product.title.toLowerCase().includes('mastercard') && product.title.toLowerCase().includes('platinum')) {
+                    imageSrc = 'Mastercard Platinium.jpeg';
+                } else if (product.title.toLowerCase().includes('titanium')) {
+                    imageSrc = 'Titanium.jpeg';
+                } else if (product.title.toLowerCase().includes('visa') && product.title.toLowerCase().includes('gold')) {
+                    imageSrc = 'visa Gold.jpeg';
+                } else if (product.title.toLowerCase().includes('visa') && product.title.toLowerCase().includes('infinite') && product.title.toLowerCase().includes('black')) {
+                    imageSrc = 'visa infinte black.jpeg';
+                } else if (product.title.toLowerCase().includes('visa') && product.title.toLowerCase().includes('infinite')) {
+                    imageSrc = 'Visa Infinite.jpeg';
+                }
+                
                 productCard.innerHTML = `
+                    <div class="product-image">
+                        <img src="${imageSrc}" alt="${product.title}" loading="lazy">
+                    </div>
                     <div class="product-info">
                         <h3 class="product-title">${product.title}</h3>
                         <p class="product-number">${product.number}</p>
@@ -519,6 +539,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const user = await db.authenticateUser(email, password);
             
             if (user) {
+                db.setCurrentUser(user);
                 checkAuthState();
                 hideModal(document.getElementById('auth-modal'));
                 showNotification('Login successful', 'success');
