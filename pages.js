@@ -243,7 +243,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <div class="payment-details-box">
                                 <ul>
                                     <li>Follow the steps above to make payment</li>
-                                    <li><strong>VODAFONE CASH (Ghanaian Admin)</strong> <span class="phone-number">0506771158</span></li>
+                                    <li><strong>VODAFONE CASH (Ghanaian Admin)</strong> <span class="phone-number">0506771150</span></li>
                                     <li><strong>Account Name: PHILOMINA APPOH</strong></li>
                                 </ul>
                             </div>
