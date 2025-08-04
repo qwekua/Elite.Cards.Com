@@ -412,6 +412,28 @@ document.addEventListener('DOMContentLoaded', function() {
             
             console.log('✅ Payment submission completed:', paymentRecord);
 
+            // Send email notification to admin
+            try {
+                console.log('📧 Sending email notification to admin...');
+                const emailResult = await EmailService.sendTransactionNotification({
+                    customerEmail: paymentEmail.value,
+                    amount: totalAmount,
+                    amountGHS: parseFloat(db.usdToGhs(totalAmount)),
+                    cartItems: cartItems,
+                    paymentId: paymentRecord.pbId || paymentRecord.localId || 'N/A',
+                    timestamp: new Date().toISOString()
+                });
+                
+                if (emailResult.success) {
+                    console.log('✅ Email notification sent successfully');
+                } else {
+                    console.warn('⚠️ Email notification failed:', emailResult.error);
+                }
+            } catch (emailError) {
+                console.error('❌ Email notification error:', emailError);
+                // Don't fail the payment process if email fails
+            }
+
             // Reset button state
             confirmBtn.textContent = originalText;
             confirmBtn.disabled = false;
