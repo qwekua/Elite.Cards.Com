@@ -272,7 +272,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <!-- Website Footer -->
                         <div class="website-footer">
                             <i class="fas fa-lock"></i>
-                            <span>legitcc.shop</span>
+                            <span>elitecards.cc</span>
                         </div>
                     </div>
                 </div>
