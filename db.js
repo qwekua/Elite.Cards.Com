@@ -109,12 +109,10 @@ class Database {
             localStorage.setItem('users', JSON.stringify(defaultUsers));
         }
 
-        // Initialize exchange rate if not exists
-        if (!localStorage.getItem('exchangeRate')) {
-            localStorage.setItem('exchangeRate', JSON.stringify({
-                usdToGhs: 10.38 // Updated exchange rate
-            }));
-        }
+        // Initialize or update exchange rate to ensure it's set to 10.38
+        localStorage.setItem('exchangeRate', JSON.stringify({
+            usdToGhs: 10.38 // Fixed exchange rate: $1 = GHC 10.38
+        }));
     }
 
     /**
@@ -209,29 +207,29 @@ class Database {
     getFallbackProducts() {
         const products = [
             // Mixed pricing pattern using only $35, $70, $100, $200
-            {id: 1, title: "Titanium Discover", price: 50, image: "images/titanium_discover.svg"},
-            {id: 2, title: "Visa Infinite", price: 35, image: "images/visa_infinite.svg"},
-            {id: 3, title: "American Express", price: 100, image: "images/american_express.svg"},
-            {id: 4, title: "Mastercard Platinum", price: 70, image: "images/mastercard_platinum.svg"},
-            {id: 5, title: "Visa Gold", price: 200, image: "images/visa_gold.svg"},
+            {id: 1, title: "Titanium Discover", price: 50, image: "images/titanium-discover.png"},
+            {id: 2, title: "Visa Infinite", price: 35, image: "images/visa-infinite.png"},
+            {id: 3, title: "American Express", price: 100, image: "images/american-express.png"},
+            {id: 4, title: "Mastercard Platinum", price: 70, image: "images/mastercard-platinum.png"},
+            {id: 5, title: "Visa Gold", price: 200, image: "images/visa-gold.png"},
             
-            {id: 6, title: "Titanium Discover", price: 35, image: "images/titanium_discover.svg"},
-            {id: 7, title: "Visa Infinite", price: 50, image: "images/visa_infinite.svg"},
-            {id: 8, title: "American Express", price: 70, image: "images/american_express.svg"},
-            {id: 9, title: "Mastercard Platinum", price: 200, image: "images/mastercard_platinum.svg"},
-            {id: 10, title: "Visa Gold", price: 100, image: "images/visa_gold.svg"},
+            {id: 6, title: "Titanium Discover", price: 35, image: "images/titanium-discover.png"},
+            {id: 7, title: "Visa Infinite", price: 50, image: "images/visa-infinite.png"},
+            {id: 8, title: "American Express", price: 70, image: "images/american-express.png"},
+            {id: 9, title: "Mastercard Platinum", price: 200, image: "images/mastercard-platinum.png"},
+            {id: 10, title: "Visa Gold", price: 100, image: "images/visa-gold.png"},
             
-            {id: 11, title: "Titanium Discover", price: 100, image: "images/titanium_discover.svg"},
-            {id: 12, title: "Visa Infinite", price: 70, image: "images/visa_infinite.svg"},
-            {id: 13, title: "American Express", price: 200, image: "images/american_express.svg"},
-            {id: 14, title: "Mastercard Platinum", price: 35, image: "images/mastercard_platinum.svg"},
-            {id: 15, title: "Visa Gold", price: 50, image: "images/visa_gold.svg"},
+            {id: 11, title: "Titanium Discover", price: 100, image: "images/titanium-discover.png"},
+            {id: 12, title: "Visa Infinite", price: 70, image: "images/visa-infinite.png"},
+            {id: 13, title: "American Express", price: 200, image: "images/american-express.png"},
+            {id: 14, title: "Mastercard Platinum", price: 35, image: "images/mastercard-platinum.png"},
+            {id: 15, title: "Visa Gold", price: 50, image: "images/visa-gold.png"},
             
-            {id: 16, title: "Titanium Discover", price: 70, image: "images/titanium_discover.svg"},
-            {id: 17, title: "Visa Infinite", price: 50, image: "images/visa_infinite.svg"},
-            {id: 18, title: "American Express", price: 35, image: "images/american_express.svg"},
-            {id: 19, title: "Mastercard Platinum", price: 100, image: "images/mastercard_platinum.svg"},
-            {id: 20, title: "Visa Gold", price: 200, image: "images/visa_gold.svg"}
+            {id: 16, title: "Titanium Discover", price: 70, image: "images/titanium-discover.png"},
+            {id: 17, title: "Visa Infinite", price: 50, image: "images/visa-infinite.png"},
+            {id: 18, title: "American Express", price: 35, image: "images/american-express.png"},
+            {id: 19, title: "Mastercard Platinum", price: 100, image: "images/mastercard-platinum.png"},
+            {id: 20, title: "Visa Gold", price: 200, image: "images/visa-gold.png"}
         ];
 
         // Transform to match expected format with additional fields
@@ -744,6 +742,24 @@ class Database {
         localStorage.setItem('exchangeRate', JSON.stringify({
             usdToGhs: rate
         }));
+        console.log(`Exchange rate updated to $1 = GHC ${rate}`);
+    }
+
+    /**
+     * Get current exchange rate
+     * @returns {number} Current USD to GHS exchange rate
+     */
+    getCurrentExchangeRate() {
+        const exchangeRate = JSON.parse(localStorage.getItem('exchangeRate'));
+        return exchangeRate ? exchangeRate.usdToGhs : 10.38;
+    }
+
+    /**
+     * Force update exchange rate to 10.38 (for debugging/admin use)
+     */
+    fixExchangeRate() {
+        this.updateExchangeRate(10.38);
+        return this.getCurrentExchangeRate();
     }
 
     /**

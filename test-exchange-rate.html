@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exchange Rate Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-result {
+            margin: 15px 0;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background-color: #0056b3; }
+        .calculation {
+            font-family: monospace;
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Exchange Rate Test - Elite Cards</h1>
+        <p>This page tests the current USD to GHS exchange rate in the application.</p>
+        
+        <div id="results"></div>
+        
+        <button onclick="testExchangeRate()">Test Current Rate</button>
+        <button onclick="forceFixRate()">Force Fix to 10.38</button>
+        <button onclick="clearLocalStorage()">Clear All Data</button>
+        <button onclick="testCalculations()">Test Sample Calculations</button>
+    </div>
+
+    <script src="db.js"></script>
+    <script>
+        function displayResult(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.innerHTML = message;
+            results.appendChild(div);
+        }
+
+        function testExchangeRate() {
+            document.getElementById('results').innerHTML = '';
+            
+            try {
+                // Get current rate from localStorage
+                const exchangeData = localStorage.getItem('exchangeRate');
+                displayResult(`Raw localStorage data: ${exchangeData}`, 'info');
+                
+                if (exchangeData) {
+                    const parsed = JSON.parse(exchangeData);
+                    displayResult(`Parsed exchange rate: $1 = GHC ${parsed.usdToGhs}`, parsed.usdToGhs === 10.38 ? 'success' : 'error');
+                } else {
+                    displayResult('No exchange rate found in localStorage', 'error');
+                }
+                
+                // Test the database function
+                const currentRate = db.getCurrentExchangeRate();
+                displayResult(`Database function returns: $1 = GHC ${currentRate}`, currentRate === 10.38 ? 'success' : 'error');
+                
+                // Test conversion function
+                const testAmount = 100;
+                const converted = db.usdToGhs(testAmount);
+                const expected = (testAmount * 10.38).toFixed(2);
+                displayResult(`Conversion test: $${testAmount} = GHS ${converted} (expected: GHS ${expected})`, 
+                    converted === expected ? 'success' : 'error');
+                
+            } catch (error) {
+                displayResult(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        function forceFixRate() {
+            try {
+                db.fixExchangeRate();
+                displayResult('Exchange rate forced to $1 = GHC 10.38', 'success');
+                testExchangeRate();
+            } catch (error) {
+                displayResult(`Error fixing rate: ${error.message}`, 'error');
+            }
+        }
+
+        function clearLocalStorage() {
+            localStorage.clear();
+            db.initializeData();
+            displayResult('All localStorage cleared and reinitialized', 'success');
+            testExchangeRate();
+        }
+
+        function testCalculations() {
+            document.getElementById('results').innerHTML = '';
+            displayResult('<strong>Sample Calculations with $1 = GHC 10.38:</strong>', 'info');
+            
+            const testAmounts = [35, 50, 70, 100, 200];
+            testAmounts.forEach(amount => {
+                const converted = db.usdToGhs(amount);
+                const expected = (amount * 10.38).toFixed(2);
+                displayResult(
+                    `<div class="calculation">$${amount}.00 → GHS ${converted} (expected: GHS ${expected})</div>`,
+                    converted === expected ? 'success' : 'error'
+                );
+            });
+        }
+
+        // Auto-run test on page load
+        window.addEventListener('load', function() {
+            setTimeout(testExchangeRate, 500);
+        });
+    </script>
+</body>
+</html>

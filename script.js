@@ -65,21 +65,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 productCard.className = `product-card ${cardType}`;
                 
-                // Determine the image source
+                // Use the image from product data or fallback to default
                 let imageSrc = product.image || 'images/default-card.png';
-                
-                // Map specific card titles to their JPEG images in root directory
-                if (product.title.toLowerCase().includes('mastercard') && product.title.toLowerCase().includes('platinum')) {
-                    imageSrc = 'Mastercard Platinium.jpeg';
-                } else if (product.title.toLowerCase().includes('titanium')) {
-                    imageSrc = 'Titanium.jpeg';
-                } else if (product.title.toLowerCase().includes('visa') && product.title.toLowerCase().includes('gold')) {
-                    imageSrc = 'visa Gold.jpeg';
-                } else if (product.title.toLowerCase().includes('visa') && product.title.toLowerCase().includes('infinite') && product.title.toLowerCase().includes('black')) {
-                    imageSrc = 'visa infinte black.jpeg';
-                } else if (product.title.toLowerCase().includes('visa') && product.title.toLowerCase().includes('infinite')) {
-                    imageSrc = 'Visa Infinite.jpeg';
-                }
                 
                 productCard.innerHTML = `
                     <div class="product-image">
@@ -291,6 +278,29 @@ document.addEventListener('DOMContentLoaded', function() {
             hasAuthToken: !!db.pb.authStore.token,
             authModel: db.pb.authStore.model
         };
+    };
+    
+    // Exchange rate debugging functions
+    window.getCurrentExchangeRate = function() {
+        const rate = db.getCurrentExchangeRate();
+        console.log(`Current exchange rate: $1 = GHC ${rate}`);
+        return rate;
+    };
+    
+    window.fixExchangeRate = function() {
+        const rate = db.fixExchangeRate();
+        console.log(`Exchange rate fixed to: $1 = GHC ${rate}`);
+        return rate;
+    };
+    
+    window.updateExchangeRate = function(newRate) {
+        if (!newRate || isNaN(newRate)) {
+            console.error('Please provide a valid exchange rate number');
+            return;
+        }
+        db.updateExchangeRate(newRate);
+        console.log(`Exchange rate updated to: $1 = GHC ${newRate}`);
+        return newRate;
     };
 
     // Remove from cart

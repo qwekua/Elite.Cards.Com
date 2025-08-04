@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Force Exchange Rate Update</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .result {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .success { background-color: #d4edda; color: #155724; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+            font-size: 16px;
+        }
+        button:hover { background-color: #0056b3; }
+        .rate-display {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Force Exchange Rate Update</h1>
+        <p>This tool will force update the exchange rate to $1 = GHC 10.38 and clear all cached data.</p>
+        
+        <div class="rate-display">
+            Target Rate: $1 = GHC 10.38
+        </div>
+        
+        <button onclick="forceUpdate()">🚀 Force Update Exchange Rate</button>
+        <button onclick="clearAllData()">🗑️ Clear All Cached Data</button>
+        <button onclick="testRate()">🧪 Test Current Rate</button>
+        
+        <div id="results"></div>
+        
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd;">
+            <p><strong>Instructions:</strong></p>
+            <ol style="text-align: left;">
+                <li>Click "Force Update Exchange Rate" to set the rate to 10.38</li>
+                <li>Click "Clear All Cached Data" to remove any old cached rates</li>
+                <li>Refresh your main application</li>
+                <li>The new rate should now be active</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        function displayResult(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `result ${type}`;
+            div.innerHTML = message;
+            results.appendChild(div);
+        }
+
+        function forceUpdate() {
+            document.getElementById('results').innerHTML = '';
+            
+            try {
+                // Force set the exchange rate to 10.38
+                localStorage.setItem('exchangeRate', JSON.stringify({
+                    usdToGhs: 10.38
+                }));
+                
+                displayResult('✅ Exchange rate forcefully set to $1 = GHC 10.38', 'success');
+                
+                // Test the rate
+                const rate = JSON.parse(localStorage.getItem('exchangeRate')).usdToGhs;
+                displayResult(`📊 Verified rate: $1 = GHC ${rate}`, rate === 10.38 ? 'success' : 'error');
+                
+                // Show sample calculations
+                displayResult(`💰 Sample calculations:<br>
+                    $35 = GHC ${(35 * 10.38).toFixed(2)}<br>
+                    $50 = GHC ${(50 * 10.38).toFixed(2)}<br>
+                    $70 = GHC ${(70 * 10.38).toFixed(2)}<br>
+                    $100 = GHC ${(100 * 10.38).toFixed(2)}<br>
+                    $200 = GHC ${(200 * 10.38).toFixed(2)}`, 'info');
+                
+                displayResult('🔄 Please refresh your main application to see the changes!', 'info');
+                
+            } catch (error) {
+                displayResult(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        function clearAllData() {
+            try {
+                // Clear all localStorage
+                localStorage.clear();
+                displayResult('🗑️ All cached data cleared successfully', 'success');
+                displayResult('ℹ️ You may need to refresh and login again', 'info');
+            } catch (error) {
+                displayResult(`❌ Error clearing data: ${error.message}`, 'error');
+            }
+        }
+
+        function testRate() {
+            document.getElementById('results').innerHTML = '';
+            
+            try {
+                const exchangeData = localStorage.getItem('exchangeRate');
+                if (exchangeData) {
+                    const rate = JSON.parse(exchangeData).usdToGhs;
+                    displayResult(`📊 Current rate: $1 = GHC ${rate}`, rate === 10.38 ? 'success' : 'info');
+                    
+                    // Test calculations
+                    const testAmounts = [35, 50, 70, 100, 200];
+                    let calculations = '💰 Current calculations:<br>';
+                    testAmounts.forEach(amount => {
+                        calculations += `$${amount} = GHC ${(amount * rate).toFixed(2)}<br>`;
+                    });
+                    displayResult(calculations, 'info');
+                } else {
+                    displayResult('❌ No exchange rate found in storage', 'error');
+                }
+            } catch (error) {
+                displayResult(`❌ Error testing rate: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-test on page load
+        window.addEventListener('load', function() {
+            setTimeout(testRate, 500);
+        });
+    </script>
+</body>
+</html>
