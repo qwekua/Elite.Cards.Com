@@ -148,10 +148,18 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const cartItem = document.createElement('div');
             cartItem.className = `cart-item ${cardType}-cart-item`;
+            
+            // Use the image from product data or fallback to default
+            let imageSrc = product.image || 'images/default-card.png';
+            
             cartItem.innerHTML = `
+                <div class="cart-item-image">
+                    <img src="${imageSrc}" alt="${product.title}" loading="lazy">
+                </div>
                 <div class="cart-item-details">
                     <h3>${product.title}</h3>
                     <p class="cart-item-number">${product.number}</p>
+                    <p class="cart-item-quantity">Quantity: ${item.quantity}</p>
                 </div>
                 <div class="cart-item-price">$${(product.price * item.quantity).toFixed(2)}</div>
                 <div class="cart-item-conversion">GHS ${db.usdToGhs(product.price * item.quantity)}</div>
