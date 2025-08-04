@@ -8,16 +8,16 @@
 const EmailConfig = {
     // EmailJS Configuration
     // Get these values from your EmailJS dashboard: https://www.emailjs.com/
-    SERVICE_ID: 'your_service_id_here',        // Replace with your EmailJS service ID
+    SERVICE_ID: 'service_ctpg96v',        // Replace with your EmailJS service ID
     TEMPLATE_ID: 'your_template_id_here',      // Replace with your EmailJS template ID
     PUBLIC_KEY: 'your_public_key_here',        // Replace with your EmailJS public key
     
     // Admin email address
-    ADMIN_EMAIL: 'adomanua@gmail.com',
+    ADMIN_EMAIL: 'adomanuacquah.dev@gmail.com',
     
     // Email template parameters (these will be passed to the EmailJS template)
     TEMPLATE_PARAMS: {
-        to_email: 'adomanua@gmail.com',
+        to_email: 'adomanuacquah.dev@gmail.com',
         from_name: 'ElitCards System',
         subject: 'New Transaction Notification - ElitCards'
     }
