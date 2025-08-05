@@ -289,7 +289,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="success-message">
                             <i class="fas fa-check-circle"></i>
                             <p>Your payment has been received and is being processed.</p>
-                            <p>Your card details will be sent to your email within 24 hours.</p>
+                            <p>Your card details will be sent to your email .</p>
                             <button class="close-btn">Close</button>
                         </div>
                     </div>

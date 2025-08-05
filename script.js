@@ -24,7 +24,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Navigation links
     const supportLinks = document.querySelectorAll('.support-link');
     const cartLinks = document.querySelectorAll('.cart-link');
-    const closeModalButtons = document.querySelectorAll('.close-modal');
+    // We'll use event delegation instead of directly querying close buttons
+    // const closeModalButtons = document.querySelectorAll('.close-modal');
 
     // Initialize the app
     init();
@@ -1035,12 +1036,12 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // Close modal buttons
-        closeModalButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const modal = button.closest('.modal-overlay');
+        // Close modal buttons - using event delegation for dynamically loaded modals
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('close-modal')) {
+                const modal = e.target.closest('.modal-overlay');
                 hideModal(modal);
-            });
+            }
         });
 
         // Close modal when clicking outside
