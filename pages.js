@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <!-- Hero Section -->
             <section class="hero" id="home-section">
                 <div class="hero-content">
-                    <h1>Premium Virtual Cards for Your Financial Freedom</h1>
+                    <h1>Experience the Best with Premium Virtual Cards</h1>
                     <p>Access exclusive virtual cards with high limits and premium benefits tailored for global professionals.</p>
                     <div class="hero-badges">
                         <span class="badge">Secure</span>
