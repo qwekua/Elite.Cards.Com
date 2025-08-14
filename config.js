@@ -9,7 +9,7 @@ window.EliteCardsConfig = {
     // Your NodeLumes PocketBase server configuration
     pocketbase: {
         // Your PocketBase server URL (hosted on NodeLumes)
-        url: 'http://node68.lunes.host:3246',
+        url: 'https://elitecard.ct.ws/',
         
         // Collection names
         collections: {

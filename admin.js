@@ -20,7 +20,7 @@ class AdminPanel {
         if (isLocalDevelopment) {
             return 'http://localhost:8090';
         } else {
-            return 'http://node68.lunes.host:3246';
+            return 'https://elitecard.ct.ws/';
         }
     }
 
