@@ -7,9 +7,8 @@
 
 class Database {
     constructor() {
-        // Configure PocketBase URL based on environment
-        this.pocketbaseUrl = this.getPocketBaseUrl();
-        this.pb = new PocketBase(this.pocketbaseUrl);
+        // Initialize backend service
+        this.backend = new BackendService();
         this.isHttpsContext = window.location.protocol === 'https:';
         this.isProduction = this.isProductionEnvironment();
         
@@ -17,7 +16,7 @@ class Database {
         console.log('Environment:', this.isProduction ? 'Production' : 'Development');
         console.log('Protocol:', window.location.protocol);
         console.log('Host:', window.location.host);
-        console.log('PocketBase URL:', this.pocketbaseUrl);
+        console.log('Backend URL:', this.backend.backendUrl);
         
         this.initializeData();
         this.cachedProducts = null;
@@ -26,34 +25,11 @@ class Database {
     }
 
     /**
-     * Determine the appropriate PocketBase URL based on environment
-     * @returns {string} PocketBase URL
+     * Get backend URL from config
+     * @returns {string} Backend URL
      */
-    getPocketBaseUrl() {
-        // Determine PocketBase URL based on environment
-        const host = window.location.host.toLowerCase();
-        const isLocalDevelopment = host.includes('localhost') || host.includes('127.0.0.1') || host.includes('codespace');
-        
-        let pocketbaseUrl;
-        
-        if (isLocalDevelopment) {
-            // Use local PocketBase for development
-            pocketbaseUrl = 'http://localhost:8090';
-            console.log('🔧 Using local PocketBase for development');
-        } else {
-            // Use NodeLumes PocketBase server for production
-            pocketbaseUrl = 'http://node68.lunes.host:3246';
-            console.log('🌐 Using NodeLumes PocketBase for production');
-            
-            // Check if we're in a hosted environment that might have HTTPS
-            if (this.isHttpsContext) {
-                console.warn('⚠️ HTTPS frontend detected with HTTP PocketBase server.');
-                console.warn('⚠️ This may cause mixed content issues in some browsers.');
-                console.warn('💡 Consider using a proxy or upgrading PocketBase to HTTPS.');
-            }
-        }
-        
-        return pocketbaseUrl;
+    getBackendUrl() {
+        return window.EliteCardsConfig?.backend?.url || 'http://localhost:3000/api';
     }
 
     /**
@@ -162,7 +138,7 @@ class Database {
     }
 
     /**
-     * Get all products from PocketBase with caching
+     * Get all products from backend with caching
      * @returns {Promise<Array>} Array of product objects
      */
     async getProducts() {
@@ -172,20 +148,11 @@ class Database {
                 return this.cachedProducts;
             }
 
-            // Skip PocketBase if in HTTPS context due to mixed content restrictions
-            // Exception: Allow connection to your specific PocketBase server
-            if (this.isHttpsContext && !this.pocketbaseUrl.includes('node68.lunes.host:3246')) {
-                console.warn('Skipping PocketBase connection due to HTTPS mixed content restrictions. Using fallback data.');
-                return this.getFallbackProducts();
-            }
-
-            // Fetch from PocketBase
-            const resultList = await this.pb.collection('Cards').getList(1, 50, {
-                sort: '-created',
-            });
+            // Fetch from backend
+            const products = await this.backend.getCards();
 
             // Transform the data
-            const transformedProducts = resultList.items.map(card => this.transformCardData(card));
+            const transformedProducts = products.map(card => this.transformCardData(card));
             
             // Cache the results
             this.cachedProducts = transformedProducts;
@@ -193,9 +160,9 @@ class Database {
             
             return transformedProducts;
         } catch (error) {
-            console.error('Error fetching products from PocketBase:', error);
+            console.error('Error fetching products from backend:', error);
             
-            // Fallback to dummy data if PocketBase fails
+            // Fallback to dummy data if backend fails
             return this.getFallbackProducts();
         }
     }
@@ -278,7 +245,7 @@ class Database {
     }
 
     /**
-     * Get product by ID from PocketBase
+     * Get product by ID from backend
      * @param {string} id - Product ID
      * @returns {Promise<Object|null>} Product object or null if not found
      */
@@ -291,16 +258,9 @@ class Database {
                 return cachedProduct;
             }
 
-            // Skip PocketBase if in HTTPS context
-            // Exception: Allow connection to your specific PocketBase server
-            if (this.isHttpsContext && !this.pocketbaseUrl.includes('node68.lunes.host:3246')) {
-                console.warn('Skipping PocketBase direct fetch due to HTTPS mixed content restrictions.');
-                return null;
-            }
-
-            // If not in cache, fetch directly from PocketBase
-            const pbCard = await this.pb.collection('Cards').getOne(id);
-            return this.transformCardData(pbCard);
+            // If not in cache, fetch directly from backend
+            const card = await this.backend.getCardById(id);
+            return this.transformCardData(card);
         } catch (error) {
             console.error('Error fetching product by ID:', error);
             return null;
@@ -475,33 +435,24 @@ class Database {
     }
 
     /**
-     * Add new user to PocketBase and localStorage
+     * Add new user to backend and localStorage
      * @param {Object} user - User object
      * @returns {Promise<Object>} Created user object
      */
     async addUser(user) {
         try {
-            // Skip PocketBase if in HTTPS context
-            // Exception: Allow connection to your specific PocketBase server
-            if (!this.isHttpsContext || this.pocketbaseUrl.includes('node68.lunes.host:3246')) {
-                // Try to create user in PocketBase first
-                const pbUser = await this.pb.collection('users').create({
-                    name: user.name,
-                    email: user.email,
-                    password: user.password,
-                    passwordConfirm: user.password,
-                    emailVisibility: true
-                });
-                
-                // If successful, add PocketBase ID to user object
-                user.pbId = pbUser.id;
-                user.joinDate = pbUser.created;
-            } else {
-                // Fallback for HTTPS context
-                user.joinDate = new Date().toISOString();
-            }
+            // Try to create user in backend first
+            const backendUser = await this.backend.createUser({
+                name: user.name,
+                email: user.email,
+                password: user.password
+            });
+            
+            // If successful, add backend ID to user object
+            user.backendId = backendUser.id;
+            user.joinDate = backendUser.created || new Date().toISOString();
         } catch (error) {
-            console.warn('Failed to create user in PocketBase, using localStorage fallback:', error);
+            console.warn('Failed to create user in backend, using localStorage fallback:', error);
             user.joinDate = new Date().toISOString();
         }
         
@@ -514,34 +465,30 @@ class Database {
     }
 
     /**
-     * Authenticate user with PocketBase
+     * Authenticate user with backend
      * @param {string} email - User email
      * @param {string} password - User password
      * @returns {Promise<Object|null>} User object or null if authentication failed
      */
     async authenticateUser(email, password) {
         try {
-            // Skip PocketBase if in HTTPS context
-            // Exception: Allow connection to your specific PocketBase server
-            if (!this.isHttpsContext || this.pocketbaseUrl.includes('node68.lunes.host:3246')) {
-                // Try PocketBase authentication first
-                const authData = await this.pb.collection('users').authWithPassword(email, password);
+            // Try backend authentication first
+            const authData = await this.backend.authenticateUser(email, password);
+            
+            if (authData) {
+                const user = {
+                    backendId: authData.id,
+                    name: authData.name,
+                    email: authData.email,
+                    joinDate: authData.created || authData.joinDate
+                };
                 
-                if (authData.record) {
-                    const user = {
-                        pbId: authData.record.id,
-                        name: authData.record.name,
-                        email: authData.record.email,
-                        joinDate: authData.record.created
-                    };
-                    
-                    // Update localStorage with PocketBase user data
-                    this.setCurrentUser(user);
-                    return user;
-                }
+                // Update localStorage with backend user data
+                this.setCurrentUser(user);
+                return user;
             }
         } catch (error) {
-            console.warn('PocketBase authentication failed, trying localStorage fallback:', error);
+            console.warn('Backend authentication failed, trying localStorage fallback:', error);
         }
         
         // Fallback to localStorage authentication
@@ -549,7 +496,7 @@ class Database {
     }
 
     /**
-     * Record payment submission to PocketBase
+     * Record payment submission to backend
      * @param {Object} paymentData - Payment data object
      * @returns {Promise<Object>} Created payment record
      */
@@ -565,88 +512,36 @@ class Database {
             submittedAt: new Date().toISOString()
         };
 
-        let pbSuccess = false;
-        let pbError = null;
+        let backendSuccess = false;
+        let backendError = null;
 
         try {
-            // Always try PocketBase first, regardless of HTTPS context
-            console.log('🚀 Attempting to record payment in PocketBase...');
-            console.log('🌐 Current protocol:', window.location.protocol);
-            console.log('🔗 PocketBase URL:', this.pb.baseUrl);
-            console.log('🏠 Frontend host:', window.location.host);
-            console.log('🔒 HTTPS Context:', this.isHttpsContext);
-            console.log('🌍 Production Environment:', this.isProduction);
-            
-            // Create FormData for file upload - mapping to PocketBase collection fields
-            const formData = new FormData();
-            formData.append('email', paymentRecord.userEmail);
-            formData.append('name', paymentRecord.userEmail); // Use email as name for now
-            formData.append('Card_type', ''); // Empty card type to avoid validation issues
-            formData.append('note', JSON.stringify({
+            // Prepare payment data for backend
+            const backendPaymentData = {
+                email: paymentRecord.userEmail,
                 amount: paymentRecord.amount,
                 currency: paymentRecord.currency,
                 amountGHS: paymentRecord.amountGHS,
                 cartItems: JSON.parse(paymentRecord.cartItems),
                 status: paymentRecord.status,
                 submittedAt: paymentRecord.submittedAt
-            }));
-            
-            // Add screenshot file if provided - mapping to Screenshot field
+            };
+
+            // Add screenshot file if provided
             if (paymentData.screenshot) {
-                console.log('Adding screenshot file:', paymentData.screenshot.name, paymentData.screenshot.size, 'bytes');
-                formData.append('Screenshot', paymentData.screenshot);
+                backendPaymentData.screenshot = paymentData.screenshot;
             }
 
-            // Log FormData contents for debugging
-            console.log('FormData contents:');
-            for (let [key, value] of formData.entries()) {
-                if (value instanceof File) {
-                    console.log(`${key}: File(${value.name}, ${value.size} bytes, ${value.type})`);
-                } else {
-                    console.log(`${key}: ${value}`);
-                }
-            }
-
-            // Try to create payment record in PocketBase
-            const pbPayment = await this.pb.collection('payment_proofs').create(formData);
-            paymentRecord.pbId = pbPayment.id;
-            pbSuccess = true;
+            // Try to create payment record in backend
+            const backendPayment = await this.backend.createPayment(backendPaymentData);
+            paymentRecord.backendId = backendPayment.id;
+            backendSuccess = true;
             
-            console.log('✅ Payment successfully recorded in PocketBase:', pbPayment);
+            console.log('✅ Payment successfully recorded in backend:', backendPayment);
             
         } catch (error) {
-            pbError = error;
-            console.error('❌ Failed to record payment in PocketBase:', error);
-            
-            // Enhanced error handling for hosting scenarios
-            if (error.name === 'TypeError' && error.message.includes('fetch')) {
-                console.error('🚫 Network Error - Possible causes:');
-                console.error('   • CORS policy blocking cross-origin requests');
-                console.error('   • Mixed content (HTTPS frontend → HTTP PocketBase)');
-                console.error('   • PocketBase server not accessible from hosted environment');
-                console.error('   • Network connectivity issues');
-                
-                if (this.isHttpsContext && this.pocketbaseUrl.startsWith('http:')) {
-                    console.error('⚠️ MIXED CONTENT DETECTED:');
-                    console.error('   Frontend (HTTPS) trying to connect to PocketBase (HTTP)');
-                    console.error('   This is blocked by browser security policies');
-                    console.error('💡 Solutions:');
-                    console.error('   1. Upgrade PocketBase to HTTPS');
-                    console.error('   2. Use a reverse proxy with SSL');
-                    console.error('   3. Host frontend on HTTP (development only)');
-                }
-            }
-            
-            // Log detailed error information
-            if (error.response) {
-                console.error('PocketBase error response:', error.response);
-            }
-            if (error.data) {
-                console.error('PocketBase error data:', error.data);
-            }
-            if (error.status) {
-                console.error('HTTP Status:', error.status);
-            }
+            backendError = error;
+            console.error('❌ Failed to record payment in backend:', error);
         }
         
         // Always store in localStorage as fallback
@@ -657,14 +552,14 @@ class Database {
         console.log('Payment record saved to localStorage:', paymentRecord);
         
         // Return success/failure information
-        paymentRecord.pbSuccess = pbSuccess;
-        paymentRecord.pbError = pbError?.message || null;
+        paymentRecord.backendSuccess = backendSuccess;
+        paymentRecord.backendError = backendError?.message || null;
         
         return paymentRecord;
     }
 
     /**
-     * Get user payments from PocketBase or localStorage
+     * Get user payments from backend or localStorage
      * @param {string} userEmail - User email
      * @returns {Promise<Array>} Array of payment records
      */
@@ -672,38 +567,24 @@ class Database {
         let payments = [];
         
         try {
-            // Always try PocketBase first, regardless of HTTPS context
-            // Try to fetch from PocketBase first using correct collection name
-            const resultList = await this.pb.collection('payment_proofs').getList(1, 50, {
-                filter: `email = "${userEmail}"`,
-                sort: '-created',
-            });
+            // Try to fetch from backend first
+            const backendPayments = await this.backend.getPaymentsByEmail(userEmail);
             
-            payments = resultList.items.map(payment => {
-                // Parse note field which contains our payment data
-                let paymentData = {};
-                try {
-                    paymentData = JSON.parse(payment.note || '{}');
-                } catch (e) {
-                    console.warn('Failed to parse payment note:', payment.note);
-                    paymentData = {};
-                }
-                
+            payments = backendPayments.map(payment => {
                 return {
-                    pbId: payment.id,
+                    backendId: payment.id,
                     userEmail: payment.email,
-                    amount: paymentData.amount || 0,
-                    currency: paymentData.currency || 'USD',
-                    amountGHS: paymentData.amountGHS || 0,
-                    cartItems: paymentData.cartItems || [],
-                    status: paymentData.status || 'pending',
-                    submittedAt: paymentData.submittedAt || payment.created,
-                    paymentScreenshot: payment.Screenshot ?
-                        `http://node68.lunes.host:3246/api/files/payment_proofs/${payment.id}/${payment.Screenshot}` : null
+                    amount: payment.amount || 0,
+                    currency: payment.currency || 'USD',
+                    amountGHS: payment.amountGHS || 0,
+                    cartItems: payment.cartItems || [],
+                    status: payment.status || 'pending',
+                    submittedAt: payment.submittedAt || payment.created,
+                    paymentScreenshot: payment.screenshot || null
                 };
             });
         } catch (error) {
-            console.warn('Failed to fetch payments from PocketBase, using localStorage fallback:', error);
+            console.warn('Failed to fetch payments from backend, using localStorage fallback:', error);
         }
         
         // Fallback to localStorage
@@ -725,10 +606,10 @@ class Database {
         
         // Transform payments into order format for display
         return payments.map(payment => ({
-            id: payment.pbId || `local_${Date.now()}_${Math.random()}`,
+            id: payment.backendId || `local_${Date.now()}_${Math.random()}`,
             date: new Date(payment.submittedAt).toLocaleDateString(),
             items: payment.cartItems,
-            total: `$${payment.amount} (GHS ${payment.amountGHS})`,
+            total: `$${payment.amount}`,
             status: payment.status,
             paymentScreenshot: payment.paymentScreenshot
         })).slice(0, 5); // Show only last 5 orders
@@ -763,60 +644,54 @@ class Database {
     }
 
     /**
-     * Test PocketBase connection and collection access
+     * Test backend connection and API access
      * @returns {Promise<Object>} Connection test results
      */
-    async testPocketBaseConnection() {
+    async testBackendConnection() {
         const results = {
             connectionTest: false,
-            collectionAccess: false,
+            apiAccess: false,
             error: null,
             details: {}
         };
 
         try {
-            console.log('🔍 Testing PocketBase connection...');
-            console.log('PocketBase URL:', this.pb.baseUrl);
+            console.log('🔍 Testing backend connection...');
+            console.log('Backend URL:', this.backend.backendUrl);
             
             // Test basic connection by trying to get health status
             try {
-                const health = await this.pb.health.check();
+                // Assuming the backend service has a health check method
+                // If not, we can test by getting cards
+                const cards = await this.backend.getCards();
                 results.connectionTest = true;
-                results.details.health = health;
-                console.log('✅ PocketBase connection successful:', health);
+                results.details.cardCount = cards.length;
+                console.log('✅ Backend connection successful, found', cards.length, 'cards');
             } catch (healthError) {
-                console.log('❌ PocketBase health check failed:', healthError);
+                console.log('❌ Backend health check failed:', healthError);
                 results.details.healthError = healthError.message;
             }
 
-            // Test collection access
+            // Test API access
             try {
-                console.log('🔍 Testing payment_proofs collection access...');
-                const collections = await this.pb.collections.getList(1, 10);
-                results.details.collections = collections.items.map(c => ({ id: c.id, name: c.name, type: c.type }));
-                
-                const paymentProofsCollection = collections.items.find(c => c.name === 'payment_proofs');
-                if (paymentProofsCollection) {
-                    console.log('✅ payment_proofs collection found:', paymentProofsCollection);
-                    results.collectionAccess = true;
-                    results.details.paymentProofsCollection = paymentProofsCollection;
-                } else {
-                    console.log('❌ payment_proofs collection not found');
-                    console.log('Available collections:', collections.items.map(c => c.name));
-                    results.details.availableCollections = collections.items.map(c => c.name);
-                }
-            } catch (collectionError) {
-                console.log('❌ Collection access failed:', collectionError);
-                results.details.collectionError = collectionError.message;
+                console.log('🔍 Testing backend API access...');
+                // Test users API
+                const users = await this.backend.getUsers();
+                results.apiAccess = true;
+                results.details.userCount = users.length;
+                console.log('✅ Backend API access successful, found', users.length, 'users');
+            } catch (apiError) {
+                console.log('❌ Backend API access failed:', apiError);
+                results.details.apiError = apiError.message;
             }
 
         } catch (error) {
-            console.error('❌ PocketBase connection test failed:', error);
+            console.error('❌ Backend connection test failed:', error);
             results.error = error.message;
             results.details.generalError = error;
         }
 
-        console.log('🔍 PocketBase test results:', results);
+        console.log('🔍 Backend test results:', results);
         return results;
     }
 

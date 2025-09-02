@@ -78,7 +78,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         <p class="product-number">${product.number}</p>
                         <p class="product-limit">${product.limit}</p>
                         <p class="product-price">$${product.price.toFixed(2)}</p>
-                        <p class="price-conversion">GHS ${db.usdToGhs(product.price)}</p>
                         <button class="add-to-cart" data-id="${product.id}">Add to Cart</button>
                     </div>
                 `;
@@ -163,7 +162,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     <p class="cart-item-quantity">Quantity: ${item.quantity}</p>
                 </div>
                 <div class="cart-item-price">$${(product.price * item.quantity).toFixed(2)}</div>
-                <div class="cart-item-conversion">GHS ${db.usdToGhs(product.price * item.quantity)}</div>
                 <button class="remove-item" data-id="${product.id}">
                     <i class="fas fa-times"></i>
                 </button>
@@ -178,9 +176,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const serviceFee = 1; // $1 service fee
         const totalAmount = subtotal + serviceFee;
         
-        if (cartSubtotal) cartSubtotal.textContent = `${db.formatPrice(subtotal)} (GHS ${db.usdToGhs(subtotal)})`;
-        if (cartTotal) cartTotal.textContent = `${db.formatPrice(totalAmount)} (GHS ${db.usdToGhs(totalAmount)})`;
-        if (paymentAmount) paymentAmount.textContent = `${db.formatPrice(totalAmount)} (GHS ${db.usdToGhs(totalAmount)})`;
+        if (cartSubtotal) cartSubtotal.textContent = db.formatPrice(subtotal);
+        if (cartTotal) cartTotal.textContent = db.formatPrice(totalAmount);
+        if (paymentAmount) paymentAmount.textContent = db.formatPrice(totalAmount);
         
         cartSummary.style.display = 'block';
     }
@@ -328,7 +326,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const paymentAmount = document.getElementById('payment-amount');
         if (paymentAmount) {
-            paymentAmount.textContent = `${db.formatPrice(totalAmount)} (GHS ${db.usdToGhs(totalAmount)})`;
+            paymentAmount.textContent = db.formatPrice(totalAmount);
         }
     }
 

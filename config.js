@@ -1,12 +1,26 @@
 /**
  * Configuration for Elite Cards Application
- * 
+ *
  * This file contains environment-specific settings for connecting
- * your frontend to your NodeLumes PocketBase server.
+ * your frontend to your backend server.
  */
 
 window.EliteCardsConfig = {
-    // Your NodeLumes PocketBase server configuration
+    // Your backend server configuration
+    backend: {
+        // Your backend server URL
+        url: 'https://your-new-backend-url.com/api', // TODO: Replace with actual backend URL
+        
+        // Endpoint paths
+        endpoints: {
+            cards: '/cards',
+            users: '/users',
+            payments: '/payments',
+            auth: '/auth'
+        }
+    },
+    
+    // Legacy PocketBase configuration (deprecated)
     pocketbase: {
         // Your PocketBase server URL (hosted on NodeLumes)
         url: 'https://elitecard.ct.ws/',
@@ -105,6 +119,7 @@ window.EliteCardsConfig.getRecommendedConfig = function() {
     if (env.isProduction && env.isHttps) {
         return {
             environment: 'production-https',
+            backendUrl: this.backend.url,
             pocketbaseUrl: this.pocketbase.url,
             expectedIssues: [
                 'Mixed content warnings (HTTPS → HTTP)',
@@ -113,7 +128,7 @@ window.EliteCardsConfig.getRecommendedConfig = function() {
             ],
             recommendations: [
                 'Consider hosting frontend on HTTP if possible',
-                'Or upgrade PocketBase to HTTPS',
+                'Or upgrade backend to HTTPS',
                 'Or use a reverse proxy with SSL termination'
             ]
         };
@@ -122,19 +137,21 @@ window.EliteCardsConfig.getRecommendedConfig = function() {
     if (env.isProduction && !env.isHttps) {
         return {
             environment: 'production-http',
+            backendUrl: this.backend.url,
             pocketbaseUrl: this.pocketbase.url,
             expectedIssues: [
                 'Possible CORS policy restrictions'
             ],
             recommendations: [
                 'Direct connection should work',
-                'Ensure PocketBase CORS settings allow your domain'
+                'Ensure backend CORS settings allow your domain'
             ]
         };
     }
     
     return {
         environment: 'unknown',
+        backendUrl: this.backend.url,
         pocketbaseUrl: this.pocketbase.url,
         expectedIssues: ['Unknown environment'],
         recommendations: ['Check console for detailed environment info']
@@ -143,3 +160,4 @@ window.EliteCardsConfig.getRecommendedConfig = function() {
 
 console.log('⚙️ Elite Cards Configuration Loaded');
 console.log('🔧 Current Environment Analysis:', window.EliteCardsConfig.getRecommendedConfig());
+console.log('📡 Backend Service URL:', window.EliteCardsConfig.backend.url);
