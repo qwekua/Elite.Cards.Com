@@ -8,9 +8,27 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Wait for pages to be initialized
     if (!window.Pages) {
-        console.error('Pages system not initialized');
+        // If Pages is not available yet, wait for it to be initialized
+        const checkPagesInterval = setInterval(() => {
+            if (window.Pages) {
+                clearInterval(checkPagesInterval);
+                initApp();
+            }
+        }, 100);
+        
+        // Timeout after 5 seconds
+        setTimeout(() => {
+            clearInterval(checkPagesInterval);
+            console.error('Pages system failed to initialize within 5 seconds');
+        }, 5000);
         return;
     }
+    
+    // Initialize the app immediately if Pages is available
+    initApp();
+});
+
+function initApp() {
     // DOM Elements - Static elements that exist in index.html
     const mainContent = document.getElementById('main-content');
     const cartCount = document.querySelector('.cart-count');
@@ -474,52 +492,51 @@ document.addEventListener('DOMContentLoaded', function() {
             showNotification(errorMessage, 'error');
         }
     
-        // Load and display recent orders
-        async function loadRecentOrders(userEmail) {
-            const recentOrdersContainer = document.getElementById('recent-orders');
-            if (!recentOrdersContainer) return;
-    
-            try {
-                const orders = await db.getRecentOrders(userEmail);
-                
-                if (orders.length === 0) {
-                    recentOrdersContainer.innerHTML = `
-                        <div class="no-orders">
-                            <i class="fas fa-shopping-bag"></i>
-                            <p>No recent orders</p>
-                            <button class="browse-btn" id="dashboard-browse-btn">Browse Cards</button>
-                        </div>
-                    `;
-                } else {
-                    recentOrdersContainer.innerHTML = orders.map(order => `
-                        <div class="order-item">
-                            <div class="order-header">
-                                <span class="order-id">Order #${order.id.substring(0, 8)}</span>
-                                <span class="order-date">${order.date}</span>
-                            </div>
-                            <div class="order-details">
-                                <div class="order-items">
-                                    ${order.items.map(item => `
-                                        <span class="item-name">${item.title} x${item.quantity}</span>
-                                    `).join(', ')}
-                                </div>
-                                <div class="order-total">${order.total}</div>
-                            </div>
-                            <div class="order-status">
-                                <span class="status status-${order.status}">${order.status.charAt(0).toUpperCase() + order.status.slice(1)}</span>
-                            </div>
-                        </div>
-                    `).join('');
-                }
-            } catch (error) {
-                console.error('Error loading recent orders:', error);
+    // Load and display recent orders
+    async function loadRecentOrders(userEmail) {
+        const recentOrdersContainer = document.getElementById('recent-orders');
+        if (!recentOrdersContainer) return;
+
+        try {
+            const orders = await db.getRecentOrders(userEmail);
+            
+            if (orders.length === 0) {
                 recentOrdersContainer.innerHTML = `
                     <div class="no-orders">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <p>Failed to load orders</p>
+                        <i class="fas fa-shopping-bag"></i>
+                        <p>No recent orders</p>
+                        <button class="browse-btn" id="dashboard-browse-btn">Browse Cards</button>
                     </div>
                 `;
+            } else {
+                recentOrdersContainer.innerHTML = orders.map(order => `
+                    <div class="order-item">
+                        <div class="order-header">
+                            <span class="order-id">Order #${order.id.substring(0, 8)}</span>
+                            <span class="order-date">${order.date}</span>
+                        </div>
+                        <div class="order-details">
+                            <div class="order-items">
+                                ${order.items.map(item => `
+                                    <span class="item-name">${item.title} x${item.quantity}</span>
+                                `).join(', ')}
+                            </div>
+                            <div class="order-total">${order.total}</div>
+                        </div>
+                        <div class="order-status">
+                            <span class="status status-${order.status}">${order.status.charAt(0).toUpperCase() + order.status.slice(1)}</span>
+                        </div>
+                    </div>
+                `).join('');
             }
+        } catch (error) {
+            console.error('Error loading recent orders:', error);
+            recentOrdersContainer.innerHTML = `
+                <div class="no-orders">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>Failed to load orders</p>
+                </div>
+            `;
         }
     }
 
